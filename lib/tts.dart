@@ -1,4 +1,4 @@
-import 'package:text_to_speech/text_to_speech.dart';
+// import 'package:text_to_speech/text_to_speech.dart';
 // zh-TW, en-US
 
 // https://www.jianshu.com/p/8d86ba3b423a
@@ -6,14 +6,15 @@ import 'package:text_to_speech/text_to_speech.dart';
 // https://pub.dev/packages/text_to_speech/install
 
 class TextToSpseech {
-  TextToSpeech tts = TextToSpeech(); 
+  // TextToSpeech tts = TextToSpeech(); 
 
   // TextToSpseech() {
     
   // }
 
   Future speak(String text) async {
-    String text = "Hello, Good Morning!";  
-    tts.speak(text);  
+    // tts.setVolume(1);  
+    // String text = "Hello, Good Morning!";  
+    // tts.speak(text);  
   }
 }
