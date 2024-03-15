@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:sport/tts.dart';
 
 void main() {
   runApp(const MyApp());
+
+  var tts = TextToSpseech();
+
+  tts.speak("你好, 早安");
 }
 
 class MyApp extends StatelessWidget {
