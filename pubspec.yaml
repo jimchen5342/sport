@@ -30,8 +30,10 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  text_to_speech: ^0.2.3
-
+  text_to_speech: ^0.2.3 # OK 2024-03-22
+  # sensors_plus: ^5.0.0 sample 不能 run
+  # motion_sensors: ^0.1.0 sample 不能 run
+  flutter_sensors: ^1.0.1
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
