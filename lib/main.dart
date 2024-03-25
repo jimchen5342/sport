@@ -22,7 +22,7 @@ class _MyAppState extends State<MyApp> {
   int mShakeTimestamp = 0;
   TTS tts = TTS();
 
-  String recorders = "";
+  String recorders = "", direction = "";
   
   @override
   void initState() {
@@ -74,19 +74,24 @@ class _MyAppState extends State<MyApp> {
         double z = event[2];
         int xyz = sqrt(x*x + y*y + z*z).ceil();
 
-        if (acceleration < xyz && acceleration > 15) {
-          int now = DateTime.now().millisecondsSinceEpoch;
-          if (mShakeTimestamp + 500 < now) {
-            swingCount++;
-            if(swingCount % 5 == 0) {
-              tts.speak(swingCount.toString());
-            }
-            String formattedDate = DateFormat('mm:ss.ms').format(DateTime.now());
+        if (xyz > acceleration) { // 往上方向
+          if(acceleration > 15 && direction != "上" ) {
+            int now = DateTime.now().millisecondsSinceEpoch;
+            if (mShakeTimestamp + 500 < now) {
+              swingCount++;
+              if(swingCount % 5 == 0) {
+                tts.speak(swingCount.toString());
+              }
+              String formattedDate = DateFormat('mm:ss.ms').format(DateTime.now());
 
-            recorders = formattedDate + ": " + acceleration.toString() 
-              + (recorders.isNotEmpty ? "\n" : "") + recorders;
-            mShakeTimestamp = now;
+              recorders = formattedDate + ": " + acceleration.toString() 
+                + (recorders.isNotEmpty ? "\n" : "") + recorders;
+              mShakeTimestamp = now;
+            }
+            direction = "上";
           }
+        } else {
+          direction = "";
         }
         acceleration = xyz;
     }
@@ -103,7 +108,7 @@ class _MyAppState extends State<MyApp> {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(
-          title: const Text('Flutter Sensors Example'),
+          title: const Text('Flutter Sensors'),
         ),
         body: Container(
           padding: EdgeInsets.all(16.0),
