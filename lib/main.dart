@@ -75,9 +75,9 @@ class _MyAppState extends State<MyApp> {
         int xyz = sqrt(x*x + y*y + z*z).ceil();
 
         if (xyz > acceleration) { // 往上方向
-          if(acceleration > 15 && direction != "上" ) {
+          if(acceleration > 18 && direction != "上" ) {
             int now = DateTime.now().millisecondsSinceEpoch;
-            if (mShakeTimestamp + 500 < now) {
+            if (mShakeTimestamp + 600 < now) {
               swingCount++;
               if(swingCount % 5 == 0) {
                 tts.speak(swingCount.toString());
@@ -142,14 +142,15 @@ class _MyAppState extends State<MyApp> {
                 "swingCount = ${swingCount}",
                 textAlign: TextAlign.center,
               ),
-              Text(
-                recorders,
+              const SizedBox(height: 20),
+              Expanded(
+                flex: 1, 
+                child: 
+                SingleChildScrollView(child: Text(recorders,
                 maxLines: 30,
                 textAlign: TextAlign.center,
               ),
-              Expanded(
-                flex: 1, 
-                child: Container()
+                )
               ),
               Padding(padding: EdgeInsets.only(top: 16.0)),
               Row(
