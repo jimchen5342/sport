@@ -18,16 +18,18 @@ class _MyAppState extends State<MyApp> {
   StreamSubscription? _accelSubscription;
   int swingCount = 0;
   double acceleration = 0;
-  TTS tts = TTS(); 
-  
 
+  int SHAKE_SLOP_TIME_MS = 500;
+  int mShakeTimestamp = 0;
+  TTS tts = TTS();
+  
   @override
   void initState() {
-    // _checkAccelerometerStatus();
     super.initState();
     WidgetsBinding.instance?.addPostFrameCallback((_) async {
       await tts.initial();
-      tts.speak("");
+      _checkAccelerometerStatus();
+      tts.count();
     });
   }
 
@@ -44,16 +46,16 @@ class _MyAppState extends State<MyApp> {
           setState(() {
             _accelAvailable = result;
           });
-          // await tts.initial();
     });
   }
 
   Future<void> _startAccelerometer() async {
     if (_accelSubscription != null) return;
     if (_accelAvailable) {
+      swingCount = 0;
       final stream = await SensorManager().sensorUpdates(
         sensorId: Sensors.ACCELEROMETER,
-        interval: Sensors.SENSOR_DELAY_FASTEST,
+        interval: Sensors.SENSOR_DELAY_UI, //  Sensors.SENSOR_DELAY_FASTEST,
       );
       _accelSubscription = stream.listen((sensorEvent) {
         setState(() {
@@ -69,13 +71,25 @@ class _MyAppState extends State<MyApp> {
         double x = event[0];
         double y = event[1];
         double z = event[2];
-        acceleration = sqrt(x*x + y*y + z*z);
+        double xyz = sqrt(x*x + y*y + z*z);
 
-        // 如果檢測到手擺動，增加手擺動次數
-        if (acceleration > 15) {  // 這個閾值可能需要調整
+        // // 如果檢測到手擺動，增加手擺動次數
+        // if (acceleration > 15) {  // 這個閾值可能需要調整
+        //     swingCount++;
+        //     // tts.speak(swingCount.toString());
+        // }
+        
+        if (acceleration < xyz && acceleration > 15) {
+          int now = DateTime.now().millisecondsSinceEpoch;
+          if (mShakeTimestamp + 300 < now) {
             swingCount++;
-            // tts.speak(swingCount.toString());
+            if(swingCount % 5 == 0) {
+              tts.speak(swingCount.toString());
+            }
+          }
+          mShakeTimestamp = now;
         }
+        acceleration = xyz;
     }
 
 
@@ -98,30 +112,30 @@ class _MyAppState extends State<MyApp> {
           child: Column(
             children: <Widget>[
               Text(
-                "Accelerometer Test",
-                textAlign: TextAlign.center,
-              ),
-              Text(
                 "Accelerometer Enabled: $_accelAvailable",
                 textAlign: TextAlign.center,
               ),
               Padding(padding: EdgeInsets.only(top: 16.0)),
               Text(
-                "[0](X) = ${_accelData[0]}",
+                "X = ${_accelData[0]}",
                 textAlign: TextAlign.center,
               ),
               Padding(padding: EdgeInsets.only(top: 16.0)),
               Text(
-                "[1](Y) = ${_accelData[1]}",
+                "Y = ${_accelData[1]}",
                 textAlign: TextAlign.center,
               ),
               Padding(padding: EdgeInsets.only(top: 16.0)),
               Text(
-                "[2](Z) = ${_accelData[2]}",
+                "Z = ${_accelData[2]}",
                 textAlign: TextAlign.center,
               ),
                Text(
                 "acceleration = ${acceleration}",
+                textAlign: TextAlign.center,
+              ),
+              Text(
+                "swingCount = ${swingCount}",
                 textAlign: TextAlign.center,
               ),
               Padding(padding: EdgeInsets.only(top: 16.0)),

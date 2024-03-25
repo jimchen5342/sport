@@ -7,21 +7,27 @@ class TTS {
 
   Future<void> initial() async {
     /// populate lang code (i.e. en-US)
+    /// 
+    final List<String>? displayLanguages = await tts.getDisplayLanguages();
+    if (displayLanguages == null) {
+      return;
+    }
     tts.setLanguage("en-US");
   }
-
-
 
   Future speak(String text) async {
     // tts.setVolume(1);  
     // String text = "Hello, Good Morning!";  
-    // tts.speak(text);
+    tts.speak(text);
+  }
 
+  Future count() async {
     for(var i = 0; i < 100; i++) {
        tts.speak(i.toString());
       await waitTask();
     }
   }
+
 
   Future waitTask() async {
     await Future.delayed(const Duration(seconds: 1));
