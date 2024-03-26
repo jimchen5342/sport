@@ -83,9 +83,9 @@ class _MyAppState extends State<MyApp> {
     print(xyz);
 
     if (xyz > acceleration) { // 往上方向
-      if(acceleration > 18 && direction != "上" ) {
+      if(acceleration > 20 && direction != "上" ) {
         int now = DateTime.now().millisecondsSinceEpoch;
-        if (mShakeTimestamp + 600 < now) {
+        if (mShakeTimestamp + 800 < now) {
           swingCount++;
           // if(swingCount % 5 == 0) {
             tts.speak(swingCount.toString());
