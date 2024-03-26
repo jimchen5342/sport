@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:math';
-import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_sensors/flutter_sensors.dart';
 import 'package:./sport/tts.dart';
@@ -18,7 +17,7 @@ class _MyAppState extends State<MyApp> {
   StreamSubscription? _accelSubscription;
   int swingCount = 0;
   int acceleration = 0;
-
+  int mShakeTimeSpan = 800;
   int mShakeTimestamp = 0;
   TTS tts = TTS();
 
@@ -85,14 +84,14 @@ class _MyAppState extends State<MyApp> {
     if (xyz > acceleration) { // 往上方向
       if(acceleration > 20 && direction != "上" ) {
         int now = DateTime.now().millisecondsSinceEpoch;
-        if (mShakeTimestamp + 800 < now) {
+        if (mShakeTimestamp + mShakeTimeSpan < now) {
           swingCount++;
           // if(swingCount % 5 == 0) {
             tts.speak(swingCount.toString());
           // }
           var curr = DateTime.now();
           var time = "$curr".substring(11, 23);
-          recorders = time + ": " + acceleration.toString() 
+          recorders = swingCount.toString() + ". " + time + ": " + acceleration.toString() 
             + (recorders.isNotEmpty ? "\n" : "") + recorders;
           mShakeTimestamp = now;
         }
@@ -104,69 +103,90 @@ class _MyAppState extends State<MyApp> {
     acceleration = xyz;
   }
 
-
   void _stopAccelerometer() {
-    acceleration = 0;
     if (_accelSubscription == null) return;
     _accelSubscription?.cancel();
     _accelSubscription = null;
     acceleration = 0;
-    setState(() {
-    });
+    setState(() {});
   }
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+      ),
       home: Scaffold(
         appBar: AppBar(
           title: const Text('Flutter Sensors'),
         ),
         body: Container(
-          padding: EdgeInsets.all(16.0),
+          padding: EdgeInsets.all(0.0),
           alignment: AlignmentDirectional.topCenter,
           child: Column(
             children: <Widget>[
-               Text(
-                "acceleration = ${acceleration}",
-                textAlign: TextAlign.center,
-              ),
+              //  Text(
+              //   "acceleration = ${acceleration}",
+              //   textAlign: TextAlign.center,
+              // ),
               Text(
-                "swingCount = ${swingCount}",
+                "次數：${swingCount}",
+                style: const TextStyle(
+                  // color:Colors.white,
+                  fontSize: 20
+                ),
                 textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 10),
               Expanded(
                 flex: 1, 
                 child: 
-                SingleChildScrollView(child: Text(recorders,
-                maxLines: 30,
-                textAlign: TextAlign.center,
-              ),
+                SingleChildScrollView(child: 
+                  Text(recorders,
+                    style: const TextStyle(
+                      // color:Colors.white,
+                      fontSize: 16
+                    ),  
+                    maxLines: 300,
+                    textAlign: TextAlign.center,
+                  ),
                 )
               ),
-              Padding(padding: EdgeInsets.only(top: 16.0)),
+              Padding(padding: EdgeInsets.only(top: 10.0)),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
                   if(acceleration ==0 )
-                      MaterialButton(
-                      child: Text("Start"),
+                    MaterialButton(
+                        padding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 30.0),
+                      child: Text("開始",
+                        style: TextStyle(
+                          color:Colors.white,
+                          fontSize: 20
+                        )
+                      ),
                       color: Colors.green,
                       onPressed:
                           _accelAvailable ? () => _startAccelerometer() : null,
                     )
                   else 
                     MaterialButton(
-                      child: Text("Stop"),
+                      padding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 30.0),
+                      child: Text("結束",
+                        style: TextStyle(
+                          color:Colors.white,
+                          fontSize: 20
+                        )
+                      ),
                       color: Colors.red,
                       onPressed:
                           _accelAvailable ? () => _stopAccelerometer() : null,
                     ),
                 ],
               ),
-              Padding(padding: EdgeInsets.only(top: 16.0)),
-              
+              // Padding(padding: EdgeInsets.symmetric(vertical: 2.0, horizontal: 10.0),),
             ],
           ),
         ),
