@@ -27,10 +27,16 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
+
     WidgetsBinding.instance?.addPostFrameCallback((_) async {
-      await tts.initial();
-      _checkAccelerometerStatus();
-      // tts.count();
+      try {
+        await tts.initial();
+        // tts.count();
+      } catch (e) {
+        debugPrint(e.toString());
+      } finally {
+        _checkAccelerometerStatus();
+      }
     });
   }
 
@@ -42,12 +48,13 @@ class _MyAppState extends State<MyApp> {
 
   void _checkAccelerometerStatus() async {
     await SensorManager()
-        .isSensorAvailable(Sensors.ACCELEROMETER)
-        .then((result) async {
-          setState(() {
-            _accelAvailable = result;
-          });
-    });
+      .isSensorAvailable(Sensors.ACCELEROMETER)
+      .then((result) async {
+        setState(() {
+          _accelAvailable = result;
+        });
+      }
+    );
   }
 
   Future<void> _startAccelerometer() async {
@@ -69,38 +76,43 @@ class _MyAppState extends State<MyApp> {
   }
 
   void onSensorChanged(List<double> event) {
-        double x = event[0];
-        double y = event[1];
-        double z = event[2];
-        int xyz = sqrt(x*x + y*y + z*z).ceil();
+    double x = event[0];
+    double y = event[1];
+    double z = event[2];
+    int xyz = sqrt(x*x + y*y + z*z).ceil();
+    print(xyz);
 
-        if (xyz > acceleration) { // 往上方向
-          if(acceleration > 18 && direction != "上" ) {
-            int now = DateTime.now().millisecondsSinceEpoch;
-            if (mShakeTimestamp + 600 < now) {
-              swingCount++;
-              if(swingCount % 5 == 0) {
-                tts.speak(swingCount.toString());
-              }
-              String formattedDate = DateFormat('mm:ss.ms').format(DateTime.now());
-
-              recorders = formattedDate + ": " + acceleration.toString() 
-                + (recorders.isNotEmpty ? "\n" : "") + recorders;
-              mShakeTimestamp = now;
-            }
-            direction = "上";
-          }
-        } else {
-          direction = "";
+    if (xyz > acceleration) { // 往上方向
+      if(acceleration > 18 && direction != "上" ) {
+        int now = DateTime.now().millisecondsSinceEpoch;
+        if (mShakeTimestamp + 600 < now) {
+          swingCount++;
+          // if(swingCount % 5 == 0) {
+            tts.speak(swingCount.toString());
+          // }
+          var curr = DateTime.now();
+          var time = "$curr".substring(11, 23);
+          recorders = time + ": " + acceleration.toString() 
+            + (recorders.isNotEmpty ? "\n" : "") + recorders;
+          mShakeTimestamp = now;
         }
-        acceleration = xyz;
+        direction = "上";
+      }
+    } else {
+      direction = "";
     }
+    acceleration = xyz;
+  }
 
 
   void _stopAccelerometer() {
+    acceleration = 0;
     if (_accelSubscription == null) return;
     _accelSubscription?.cancel();
     _accelSubscription = null;
+    acceleration = 0;
+    setState(() {
+    });
   }
 
   @override
@@ -115,25 +127,6 @@ class _MyAppState extends State<MyApp> {
           alignment: AlignmentDirectional.topCenter,
           child: Column(
             children: <Widget>[
-              // Text(
-              //   "Accelerometer Enabled: $_accelAvailable",
-              //   textAlign: TextAlign.center,
-              // ),
-              // Padding(padding: EdgeInsets.only(top: 16.0)),
-              // Text(
-              //   "X = ${_accelData[0]}",
-              //   textAlign: TextAlign.center,
-              // ),
-              // Padding(padding: EdgeInsets.only(top: 16.0)),
-              // Text(
-              //   "Y = ${_accelData[1]}",
-              //   textAlign: TextAlign.center,
-              // ),
-              // Padding(padding: EdgeInsets.only(top: 16.0)),
-              // Text(
-              //   "Z = ${_accelData[2]}",
-              //   textAlign: TextAlign.center,
-              // ),
                Text(
                 "acceleration = ${acceleration}",
                 textAlign: TextAlign.center,
@@ -156,19 +149,20 @@ class _MyAppState extends State<MyApp> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
-                  MaterialButton(
-                    child: Text("Start"),
-                    color: Colors.green,
-                    onPressed:
-                        _accelAvailable ? () => _startAccelerometer() : null,
-                  ),
-                  Padding(padding: EdgeInsets.all(8.0)),
-                  MaterialButton(
-                    child: Text("Stop"),
-                    color: Colors.red,
-                    onPressed:
-                        _accelAvailable ? () => _stopAccelerometer() : null,
-                  ),
+                  if(acceleration ==0 )
+                      MaterialButton(
+                      child: Text("Start"),
+                      color: Colors.green,
+                      onPressed:
+                          _accelAvailable ? () => _startAccelerometer() : null,
+                    )
+                  else 
+                    MaterialButton(
+                      child: Text("Stop"),
+                      color: Colors.red,
+                      onPressed:
+                          _accelAvailable ? () => _stopAccelerometer() : null,
+                    ),
                 ],
               ),
               Padding(padding: EdgeInsets.only(top: 16.0)),
