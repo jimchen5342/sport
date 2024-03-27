@@ -137,7 +137,6 @@ class _SwingState extends State<Swing> {
               Icons.arrow_back_ios_sharp,
               color: Colors.white,
             ),
-            // onPressed: () => Navigator.pop(context),
             onPressed: () => quit(),
           ),
           title: Text('擺手偵測',
@@ -220,8 +219,12 @@ class _SwingState extends State<Swing> {
                       )
                     ),
                     color: Colors.green,
-                    onPressed:
-                        _accelAvailable ? () => _startAccelerometer() : null,
+                    onPressed:() {
+                       if(_accelAvailable) {
+                        tts.speak("start");
+                        _startAccelerometer();
+                       }
+                    }
                   )
                 else 
                   MaterialButton(
@@ -233,8 +236,12 @@ class _SwingState extends State<Swing> {
                       )
                     ),
                     color: Colors.red,
-                    onPressed:
-                        _accelAvailable ? () => _stopAccelerometer() : null,
+                    onPressed:() {
+                       if(_accelAvailable) {
+                        tts.speak("stop");
+                        _stopAccelerometer();
+                       }
+                    }
                   ),
               ],
             ),
