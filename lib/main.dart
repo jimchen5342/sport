@@ -114,7 +114,7 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      debugShowCheckedModeBanner: false,
+      // debugShowCheckedModeBanner: false,
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
@@ -123,48 +123,53 @@ class _MyAppState extends State<MyApp> {
           title: const Text('Flutter Sensors'),
         ),
         body: Container(
-          padding: EdgeInsets.all(0.0),
+          padding: EdgeInsets.all(10.0),
           alignment: AlignmentDirectional.topCenter,
           child: Column(
             children: <Widget>[
-              //  Text(
-              //   "acceleration = ${acceleration}",
-              //   textAlign: TextAlign.center,
-              // ),
-              Text(
-                "次數：${swingCount}",
-                style: const TextStyle(
-                  // color:Colors.white,
-                  fontSize: 20
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 10),
               Expanded(
                 flex: 1, 
-                child: 
-                SingleChildScrollView(child: 
-                  Text(recorders,
+                child: Container(
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.grey),
+                  ),
+                  width: double.infinity,
+                  padding: EdgeInsets.all(5.0),
+                  child: SingleChildScrollView(child: 
+                    Text(recorders,
+                      style: const TextStyle(
+                        // color:Colors.white,
+                        fontSize: 16
+                      ),  
+                      maxLines: 300,
+                      textAlign: TextAlign.center,
+                    ),
+                  )
+                ),  
+              ),
+              Padding(padding: EdgeInsets.only(top: 5.0)),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                // mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                
+                children: <Widget>[
+                  Text(
+                    "次數：${swingCount}",
                     style: const TextStyle(
                       // color:Colors.white,
-                      fontSize: 16
-                    ),  
-                    maxLines: 300,
+                      fontSize: 20
+                    ),
                     textAlign: TextAlign.center,
                   ),
-                )
-              ),
-              Padding(padding: EdgeInsets.only(top: 10.0)),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
+                  Expanded( flex: 1,  child: Container() ),
                   if(acceleration ==0 )
                     MaterialButton(
-                        padding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 30.0),
+                        padding: EdgeInsets.symmetric(vertical: 5.0, horizontal: 30.0),
                       child: Text("開始",
                         style: TextStyle(
                           color:Colors.white,
-                          fontSize: 20
+                          fontSize: 18
                         )
                       ),
                       color: Colors.green,
@@ -173,11 +178,11 @@ class _MyAppState extends State<MyApp> {
                     )
                   else 
                     MaterialButton(
-                      padding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 30.0),
+                      padding: EdgeInsets.symmetric(vertical: 5.0, horizontal: 30.0),
                       child: Text("結束",
                         style: TextStyle(
                           color:Colors.white,
-                          fontSize: 20
+                          fontSize: 18
                         )
                       ),
                       color: Colors.red,
