@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_sensors/flutter_sensors.dart';
 import 'package:./sport/tts.dart';
+import 'package:./sport/system/storage.dart';
 
 class Swing extends StatefulWidget {
   // Swing({Key? key}) : super(key: key){
@@ -10,9 +11,8 @@ class Swing extends StatefulWidget {
   @override
   _SwingState createState() => _SwingState();
 }
-// Navigator.pop(context);
-
 class _SwingState extends State<Swing> {
+  
   bool _accelAvailable = false;
   List<double> _accelData = List.filled(3, 0.0);
   StreamSubscription? _accelSubscription;
@@ -22,6 +22,7 @@ class _SwingState extends State<Swing> {
   int mShakeTimestamp = 0;
   TTS tts = TTS();
   String recorders = "", direction = "";
+  List<dynamic> list = [];
 
   @override
   void initState() {
@@ -166,15 +167,14 @@ class _SwingState extends State<Swing> {
       alignment: AlignmentDirectional.topCenter,
       child: Column(
         children: <Widget>[
-            Text(
-            "acceleration：${acceleration}",
-            style: const TextStyle(
-              // color:Colors.white,
-              fontSize: 20
-            ),
-            textAlign: TextAlign.center,
-          ),
-
+          // Text(
+          //   "acceleration：${acceleration}",
+          //   style: const TextStyle(
+          //     // color:Colors.white,
+          //     fontSize: 20
+          //   ),
+          //   textAlign: TextAlign.center,
+          // ),
           Expanded(
             flex: 1, 
             child: Container(

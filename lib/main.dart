@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:./sport/swing.dart';
+import 'package:./sport/system/storage.dart';
 
 void main() => runApp(MyApp());
 
@@ -53,11 +54,14 @@ class _HomePage extends StatefulWidget {
 
 // 
 class _HomePageState extends State<_HomePage> {
-@override
+  List<dynamic> list = [];
+
+  @override
   void initState() {
     super.initState();
     WidgetsBinding.instance?.addPostFrameCallback((_) async {
-      Navigator.of(context).pushNamed('/swing');
+      // await Storage.clear();
+      list = await Storage.getJSON("swing");
     });
   }
 
