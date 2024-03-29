@@ -108,7 +108,7 @@ class _HomePageState extends State<_HomePage> {
               flex: 1, 
               child: ListView.builder(
                 itemCount: list.length,
-                // itemExtent: 50.0, //强制高度为50.0
+                itemExtent: 50.0, //强制高度为50.0
                 itemBuilder: (BuildContext context, int index) {
                   return rowRender(index); // ListTile(title: Text("$index"));
                 }
@@ -156,7 +156,7 @@ class _HomePageState extends State<_HomePage> {
           ),
           Column(
             children: [
-              Text(list[index]["date"],
+              Text("日期：" + list[index]["date"],
                 style: const TextStyle(
                   fontSize: 16
                 ),  
@@ -164,20 +164,20 @@ class _HomePageState extends State<_HomePage> {
               ),
               Row(
                 children: [
-                  // Expanded( flex: 1,  
-                  //   child: Text("左：" + list[index]["left"].toString(),
-                  //     style: const TextStyle(
-                  //       fontSize: 16
-                  //     )
-                  //   )
-                  // ),
-                  // Expanded( flex: 1,  
-                  //   child: Text("右：" + list[index]["right"].toString(),
-                  //     style: const TextStyle(
-                  //       fontSize: 16
-                  //     )
-                  //   )
-                  // ),
+                  Expanded( flex: 1,  
+                    child: Text("左：" + list[index]["left"].toString(),
+                      style: const TextStyle(
+                        fontSize: 16
+                      )
+                    )
+                  ),
+                  Expanded( flex: 1,  
+                    child: Text("右：" + list[index]["right"].toString(),
+                      style: const TextStyle(
+                        fontSize: 16
+                      )
+                    )
+                  ),
                 ]
               )
             ]
