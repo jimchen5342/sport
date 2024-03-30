@@ -15,10 +15,10 @@ class _SwingState extends State<Swing> {
   bool _accelAvailable = false;
   StreamSubscription? _accelSubscription;
   int swingCount = 0;
-  int mAccelerationStand = 20, mAcceleration = 0, 
-    mShakeTimeStand = 800, mShakeTimestamp = 0;
+  int mAccelerationStand = 18, mAcceleration = 0, 
+    mShakeTimeStand = 500, mShakeTimestamp = 0;
   TTS tts = TTS();
-  String recorders = "", direction = "", mode = "left";
+  String direction = "", mode = "";
   var dirty = false;
   var recorder = {"date": "", "left": 0, "right": 0};
   List<dynamic> list = [];
@@ -30,10 +30,7 @@ class _SwingState extends State<Swing> {
       list = await Storage.getJSON("swing");
       var curr = DateTime.now();
       var today = "$curr".substring(0, 10);
-      if(list.length > 0 && list[0]["date"] == today) {
-        recorder["left"] = list[0]["left"] as int;
-        recorder["right"] = list[0]["right"] as int;
-      } else {
+      if(list.length == 0 || (list.length > 0 && list[0]["date"] != today)) {
         recorder["date"] = today;
         list.insert(0, recorder);
       }
@@ -82,7 +79,6 @@ class _SwingState extends State<Swing> {
     if (_accelSubscription != null) return;
     if (_accelAvailable) {
       swingCount = 0;
-      recorders = "";
       final stream = await SensorManager().sensorUpdates(
         sensorId: Sensors.ACCELEROMETER,
         interval: Sensors.SENSOR_DELAY_UI, //  Sensors.SENSOR_DELAY_FASTEST,
@@ -109,10 +105,6 @@ class _SwingState extends State<Swing> {
           // if(swingCount % 5 == 0) {
             tts.speak(swingCount.toString());
           // }
-          var curr = DateTime.now();
-          var time = "$curr".substring(11, 23);
-          recorders = swingCount.toString() + ". " + time + ": " + mAcceleration.toString() 
-            + (recorders.isNotEmpty ? "\n" : "") + recorders;
           mShakeTimestamp = now;
         }
         direction = "上";
@@ -132,7 +124,7 @@ class _SwingState extends State<Swing> {
   }
 
   void quit() async {
-    if(mAcceleration == 0) {
+    if(_accelSubscription == null) {
       Navigator.of(context).pop(dirty); 
     }
   }
@@ -148,13 +140,13 @@ class _SwingState extends State<Swing> {
             ),
             onPressed: () => quit(),
           ),
-          title: const Text('擺手偵測',
+          title: const Text('單腳擺動',
             style: TextStyle( color:Colors.white,)
           ),
           // actions: [Text("First action")],
           backgroundColor: Colors.blue, 
         ),
-        body: // body()
+        body:
           PopScope(
               canPop: false,
               onPopInvoked: (bool didPop) {
@@ -186,20 +178,44 @@ class _SwingState extends State<Swing> {
           Expanded(
             flex: 1, 
             child: Container(
-              decoration: BoxDecoration(
-                border: Border.all(color: Colors.grey),
-              ),
+              // decoration: BoxDecoration(
+              //   // border: Border.all(color: Colors.grey),
+              // ),
               width: double.infinity,
               padding: EdgeInsets.all(5.0),
-              child: SingleChildScrollView(child: 
-                Text(recorders,
-                  style: const TextStyle(
-                    fontSize: 16
-                  ),  
-                  maxLines: 300,
-                  textAlign: TextAlign.center,
+              child: Column(children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Text("左腳：",
+                        style: TextStyle(
+                          // color:Colors.white,
+                          fontSize: 20
+                        )
+                      ),
+                    if(list.length > 0)                
+                      BorderOfText((list[0]["left"] as int).toString(), disabled: true),
+                    BorderOfText((recorder["left"] as int).toString())
+                  ]
                 ),
-              )
+                SizedBox(height: 20),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Text("右腳：",
+                      style: TextStyle(
+                        // color:Colors.white,
+                        fontSize: 20
+                      )
+                    ),
+                    if(list.length > 0)                
+                      BorderOfText((list[0]["right"] as int).toString(), disabled: true),
+                    BorderOfText((recorder["right"] as int).toString())
+                  ]
+                )
+              ],)
             ),  
           ),
           const Padding(padding: EdgeInsets.only(top: 5.0)),
@@ -217,10 +233,10 @@ class _SwingState extends State<Swing> {
                   textAlign: TextAlign.center,
                 ),
                 Expanded( flex: 1,  child: Container() ),
-                if(mAcceleration == 0 )
+                if(mAcceleration == 0 && mode != "left")
                   MaterialButton(
                     padding: const EdgeInsets.symmetric(vertical: 5.0, horizontal: 20.0),
-                    child: Text("左",
+                    child: Text("左腳",
                       style: TextStyle(
                         color:Colors.white,
                         fontSize: 18
@@ -235,12 +251,12 @@ class _SwingState extends State<Swing> {
                        }
                     }
                   ),
-                if(mAcceleration == 0 )
+                if(mAcceleration == 0  && mode == "")
                   SizedBox(width: 10,),
-                if(mAcceleration == 0 )
+                if(mAcceleration == 0 && mode != "right")
                   MaterialButton(
                     padding: const EdgeInsets.symmetric(vertical: 5.0, horizontal: 20.0),
-                    child: Text("右",
+                    child: Text("右腳",
                       style: TextStyle(
                         color:Colors.white,
                         fontSize: 18
@@ -266,16 +282,7 @@ class _SwingState extends State<Swing> {
                     ),
                     color: Colors.red,
                     onPressed:() async {
-                       if(_accelAvailable) {
-                        if(swingCount > 0) {
-                          dirty = true;
-                          int num = recorder[mode] as int;
-                          recorder[mode] = swingCount + num;
-                          await Storage.setJSON("swing", list);
-                        }
-                        tts.speak("stop");
-                        _stopAccelerometer();
-                       }
+                      await stop();
                     }
                   ),
               ],
@@ -283,6 +290,41 @@ class _SwingState extends State<Swing> {
           // Padding(padding: EdgeInsets.symmetric(vertical: 2.0, horizontal: 10.0),),
         ],
       ),
+    );
+  }
+
+  stop() async {
+    if(_accelAvailable) {
+      if(swingCount > 0) {
+        dirty = true;
+        list[0][mode] = swingCount + (list[0][mode] as int);
+        recorder[mode] = swingCount + (recorder[mode] as int);
+        await Storage.setJSON("swing", list);
+        setState(() {});
+      }
+      tts.speak("stop");
+      _stopAccelerometer();
+    }
+  }
+  
+  Widget BorderOfText(String text, {bool disabled = false}) {
+    return Container(
+      width: 100,
+      padding: const EdgeInsets.symmetric(vertical: 2.0, horizontal: 10.0),
+      margin: const EdgeInsets.only(left: 5.0),
+      decoration: BoxDecoration(
+          border: Border.all(color: Colors.grey.shade500),
+          borderRadius: BorderRadius.circular(5),
+          color: disabled ? Colors.grey.shade200 : Colors.transparent,
+          // shape: BoxShape.circle
+      ),
+      child: Text(text,
+        textAlign: TextAlign.right,
+        style: TextStyle(
+          color:disabled ? Colors.black38 : Colors.orangeAccent,
+          fontSize: 20
+        )
+      )
     );
   }
 }
