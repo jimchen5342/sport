@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_sensors/flutter_sensors.dart';
-import 'package:./sport/tts.dart';
+import 'package:sport/system/tts.dart';
 import 'package:./sport/system/storage.dart';
 
 class Swing extends StatefulWidget {
@@ -12,22 +12,32 @@ class Swing extends StatefulWidget {
   _SwingState createState() => _SwingState();
 }
 class _SwingState extends State<Swing> {
-  
   bool _accelAvailable = false;
-  List<double> _accelData = List.filled(3, 0.0);
   StreamSubscription? _accelSubscription;
   int swingCount = 0;
-  int acceleration = 0;
-  int mShakeTimeSpan = 800;
-  int mShakeTimestamp = 0;
+  int mAccelerationStand = 20, mAcceleration = 0, 
+    mShakeTimeStand = 800, mShakeTimestamp = 0;
   TTS tts = TTS();
-  String recorders = "", direction = "";
+  String recorders = "", direction = "", mode = "left";
+  var dirty = false;
+  var recorder = {"date": "", "left": 0, "right": 0};
   List<dynamic> list = [];
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance?.addPostFrameCallback((_) async {
+      list = await Storage.getJSON("swing");
+      var curr = DateTime.now();
+      var today = "$curr".substring(0, 10);
+      if(list.length > 0 && list[0]["date"] == today) {
+        recorder["left"] = list[0]["left"] as int;
+        recorder["right"] = list[0]["right"] as int;
+      } else {
+        recorder["date"] = today;
+        list.insert(0, recorder);
+      }
+
       try {
         await tts.initial();
         // tts.count();
@@ -38,6 +48,7 @@ class _SwingState extends State<Swing> {
       }
     });
   }
+  
   @override
   void didChangeDependencies() async {
     super.didChangeDependencies();
@@ -55,7 +66,6 @@ class _SwingState extends State<Swing> {
 
   void didChangeAppLifecycleState(AppLifecycleState state)  {
   }
-
 
   void _checkAccelerometerStatus() async {
     await SensorManager()
@@ -79,8 +89,7 @@ class _SwingState extends State<Swing> {
       );
       _accelSubscription = stream.listen((sensorEvent) {
         setState(() {
-          _accelData = sensorEvent.data;
-          onSensorChanged(_accelData);
+          onSensorChanged(sensorEvent.data);
         });
       });
     }
@@ -91,19 +100,18 @@ class _SwingState extends State<Swing> {
     double y = event[1];
     double z = event[2];
     int xyz = sqrt(x*x + y*y + z*z).ceil();
-    print(xyz);
 
-    if (xyz > acceleration) { // 往上方向
-      if(acceleration > 20 && direction != "上" ) {
+    if (xyz > mAcceleration) { // 往上方向
+      if(mAcceleration > mAccelerationStand && direction != "上" ) {
         int now = DateTime.now().millisecondsSinceEpoch;
-        if (mShakeTimestamp + mShakeTimeSpan < now) {
+        if (mShakeTimestamp + mShakeTimeStand < now) {
           swingCount++;
           // if(swingCount % 5 == 0) {
             tts.speak(swingCount.toString());
           // }
           var curr = DateTime.now();
           var time = "$curr".substring(11, 23);
-          recorders = swingCount.toString() + ". " + time + ": " + acceleration.toString() 
+          recorders = swingCount.toString() + ". " + time + ": " + mAcceleration.toString() 
             + (recorders.isNotEmpty ? "\n" : "") + recorders;
           mShakeTimestamp = now;
         }
@@ -112,20 +120,20 @@ class _SwingState extends State<Swing> {
     } else {
       direction = "";
     }
-    acceleration = xyz;
+    mAcceleration = xyz;
   }
 
   void _stopAccelerometer() {
     if (_accelSubscription == null) return;
     _accelSubscription?.cancel();
     _accelSubscription = null;
-    acceleration = 0;
+    mAcceleration = 0;
     setState(() {});
   }
 
-  void quit() {
-    if(acceleration == 0) {
-      Navigator.of(context).pop(); 
+  void quit() async {
+    if(mAcceleration == 0) {
+      Navigator.of(context).pop(dirty); 
     }
   }
 
@@ -140,7 +148,7 @@ class _SwingState extends State<Swing> {
             ),
             onPressed: () => quit(),
           ),
-          title: Text('擺手偵測',
+          title: const Text('擺手偵測',
             style: TextStyle( color:Colors.white,)
           ),
           // actions: [Text("First action")],
@@ -168,7 +176,7 @@ class _SwingState extends State<Swing> {
       child: Column(
         children: <Widget>[
           // Text(
-          //   "acceleration：${acceleration}",
+          //   "mAcceleration：${mAcceleration}",
           //   style: const TextStyle(
           //     // color:Colors.white,
           //     fontSize: 20
@@ -209,10 +217,10 @@ class _SwingState extends State<Swing> {
                   textAlign: TextAlign.center,
                 ),
                 Expanded( flex: 1,  child: Container() ),
-                if(acceleration ==0 )
+                if(mAcceleration == 0 )
                   MaterialButton(
-                    padding: EdgeInsets.symmetric(vertical: 5.0, horizontal: 30.0),
-                    child: Text("開始",
+                    padding: const EdgeInsets.symmetric(vertical: 5.0, horizontal: 20.0),
+                    child: Text("左",
                       style: TextStyle(
                         color:Colors.white,
                         fontSize: 18
@@ -222,13 +230,34 @@ class _SwingState extends State<Swing> {
                     onPressed:() {
                        if(_accelAvailable) {
                         tts.speak("start");
+                        mode = "left";
                         _startAccelerometer();
                        }
                     }
-                  )
-                else 
+                  ),
+                if(mAcceleration == 0 )
+                  SizedBox(width: 10,),
+                if(mAcceleration == 0 )
                   MaterialButton(
-                    padding: EdgeInsets.symmetric(vertical: 5.0, horizontal: 30.0),
+                    padding: const EdgeInsets.symmetric(vertical: 5.0, horizontal: 20.0),
+                    child: Text("右",
+                      style: TextStyle(
+                        color:Colors.white,
+                        fontSize: 18
+                      )
+                    ),
+                    color: Colors.green,
+                    onPressed:() {
+                       if(_accelAvailable) {
+                        tts.speak("start");
+                        mode = "right";
+                        _startAccelerometer();
+                       }
+                    }
+                  ),
+                if(mAcceleration > 0 ) 
+                  MaterialButton(
+                    padding: const EdgeInsets.symmetric(vertical: 5.0, horizontal: 30.0),
                     child: Text("結束",
                       style: TextStyle(
                         color:Colors.white,
@@ -236,8 +265,14 @@ class _SwingState extends State<Swing> {
                       )
                     ),
                     color: Colors.red,
-                    onPressed:() {
+                    onPressed:() async {
                        if(_accelAvailable) {
+                        if(swingCount > 0) {
+                          dirty = true;
+                          int num = recorder[mode] as int;
+                          recorder[mode] = swingCount + num;
+                          await Storage.setJSON("swing", list);
+                        }
                         tts.speak("stop");
                         _stopAccelerometer();
                        }

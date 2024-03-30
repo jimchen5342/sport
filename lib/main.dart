@@ -21,8 +21,6 @@ class _MyAppState extends State<MyApp> {
   void dispose() {
     super.dispose();
   }
-
-  //  Navigator.of(context).pushNamed('/two');
   
   @override
   Widget build(BuildContext context) {
@@ -61,22 +59,7 @@ class _HomePageState extends State<_HomePage> {
     WidgetsBinding.instance?.addPostFrameCallback((_) async {
       // await Storage.clear();
       list = await Storage.getJSON("swing");
-      // list.add({"date": "2024-03-20", "left": 1, "right": 1});
-      // list.insert(0, {"date": "2024-03-10", "left": 11, "right": 11});
-      // list.add({"date": "2024-03-20", "left": 1, "right": 1});
-      // list.insert(0, {"date": "2024-03-10", "left": 11, "right": 11});
-      // list.add({"date": "2024-03-20", "left": 1, "right": 1});
-      // list.insert(0, {"date": "2024-03-10", "left": 11, "right": 11});
-      // list.add({"date": "2024-03-20", "left": 1, "right": 1});
-      // list.insert(0, {"date": "2024-03-10", "left": 11, "right": 11});
-      // list.add({"date": "2024-03-20", "left": 1, "right": 1});
-      // list.insert(0, {"date": "2024-03-10", "left": 11, "right": 11});
-      // list.add({"date": "2024-03-20", "left": 1, "right": 1});
-      // list.insert(0, {"date": "2024-03-10", "left": 11, "right": 11});
-      // await Storage.setJSON("swing", list);
-
       setState(() {});
-      // print(list);
     });
   }
 
@@ -114,6 +97,7 @@ class _HomePageState extends State<_HomePage> {
                 }
               )
             ),
+            SizedBox(height: 10,),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
@@ -127,8 +111,12 @@ class _HomePageState extends State<_HomePage> {
                       )
                     ),
                     color: Colors.blue,
-                    onPressed:() {
-                       Navigator.of(context).pushNamed('/swing');
+                    onPressed:() async {
+                      bool dirty = await Navigator.of(context).pushNamed('/swing') as bool;
+                      if(dirty) {
+                        list = await Storage.getJSON("swing");
+                        setState(() {});
+                      }
                     }
                   ),
               ],
@@ -142,8 +130,10 @@ class _HomePageState extends State<_HomePage> {
   Widget rowRender(int index) {
     return Container(
       decoration: BoxDecoration(
-        border: Border.all(color: Colors.grey),
-      ),
+            border: Border(
+              bottom: BorderSide(width: 1.5, color: Colors.grey.shade300),
+            ),
+          ),
       child: Row(
         children: [
           SizedBox(width: 25,
@@ -155,6 +145,8 @@ class _HomePageState extends State<_HomePage> {
           ),
           ),
           Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text("日期：" + list[index]["date"],
                 style: const TextStyle(
@@ -163,21 +155,20 @@ class _HomePageState extends State<_HomePage> {
                 // textAlign: TextAlign.center,
               ),
               Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Expanded( flex: 1,  
-                    child: Text("左：" + list[index]["left"].toString(),
+                 Text("左：" + list[index]["left"].toString(),
+                    style: const TextStyle(
+                      fontSize: 16
+                    )
+                  ),
+                  SizedBox(width: 40),
+                  Text("右：" + list[index]["right"].toString(),
                       style: const TextStyle(
                         fontSize: 16
                       )
                     )
-                  ),
-                  Expanded( flex: 1,  
-                    child: Text("右：" + list[index]["right"].toString(),
-                      style: const TextStyle(
-                        fontSize: 16
-                      )
-                    )
-                  ),
                 ]
               )
             ]
