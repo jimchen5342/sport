@@ -16,9 +16,9 @@ class _SwingState extends State<Swing> {
   StreamSubscription? _accelSubscription;
   int swingCount = 0;
   int mAccelerationStand = 18, mAcceleration = 0, 
-    mShakeTimeStand = 500, mShakeTimestamp = 0;
+    mShakeTimeStand = 800, mShakeTimestamp = 0;
   TTS tts = TTS();
-  String direction = "", mode = "";
+  String recorders = "", direction = "", mode = "";
   var dirty = false;
   var recorder = {"date": "", "left": 0, "right": 0};
   List<dynamic> list = [];
@@ -79,6 +79,7 @@ class _SwingState extends State<Swing> {
     if (_accelSubscription != null) return;
     if (_accelAvailable) {
       swingCount = 0;
+      recorders = "";
       final stream = await SensorManager().sensorUpdates(
         sensorId: Sensors.ACCELEROMETER,
         interval: Sensors.SENSOR_DELAY_UI, //  Sensors.SENSOR_DELAY_FASTEST,
@@ -105,6 +106,12 @@ class _SwingState extends State<Swing> {
           // if(swingCount % 5 == 0) {
             tts.speak(swingCount.toString());
           // }
+
+          var curr = DateTime.now();
+          var time = "$curr".substring(11, 23);
+          recorders = swingCount.toString() + ". " + time + ": " + mAcceleration.toString() 
+            + (recorders.isNotEmpty ? "\n" : "") + recorders;
+
           mShakeTimestamp = now;
         }
         direction = "上";
@@ -162,19 +169,13 @@ class _SwingState extends State<Swing> {
   }
 
   Widget body() {
+    int left = list.length > 0 ? (list[0]["left"] as int) - (recorder["left"] as int) : 0;
+    int right = list.length > 0 ? (list[0]["right"] as int) - (recorder["right"] as int) : 0;
     return Container(
       padding: const EdgeInsets.all(10.0),
       alignment: AlignmentDirectional.topCenter,
       child: Column(
         children: <Widget>[
-          // Text(
-          //   "mAcceleration：${mAcceleration}",
-          //   style: const TextStyle(
-          //     // color:Colors.white,
-          //     fontSize: 20
-          //   ),
-          //   textAlign: TextAlign.center,
-          // ),
           Expanded(
             flex: 1, 
             child: Container(
@@ -195,7 +196,7 @@ class _SwingState extends State<Swing> {
                         )
                       ),
                     if(list.length > 0)                
-                      BorderOfText((list[0]["left"] as int).toString(), disabled: true),
+                      BorderOfText(left.toString(), disabled: true),
                     BorderOfText((recorder["left"] as int).toString())
                   ]
                 ),
@@ -211,27 +212,29 @@ class _SwingState extends State<Swing> {
                       )
                     ),
                     if(list.length > 0)                
-                      BorderOfText((list[0]["right"] as int).toString(), disabled: true),
+                      BorderOfText(right.toString(), disabled: true),
                     BorderOfText((recorder["right"] as int).toString())
                   ]
                 )
               ],)
             ),  
           ),
+          Expanded(
+            flex: 1, 
+            child: Text(
+            "次數：${swingCount}",
+            style: const TextStyle(
+              // color:Colors.white,
+              fontSize: 50
+            ),
+            textAlign: TextAlign.center,
+          ),),
           const Padding(padding: EdgeInsets.only(top: 5.0)),
           if(_accelAvailable == true)
             Row(
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: <Widget>[
-                Text(
-                  "次數：${swingCount}",
-                  style: const TextStyle(
-                    // color:Colors.white,
-                    fontSize: 20
-                  ),
-                  textAlign: TextAlign.center,
-                ),
                 Expanded( flex: 1,  child: Container() ),
                 if(mAcceleration == 0 && mode != "left")
                   MaterialButton(
@@ -252,7 +255,7 @@ class _SwingState extends State<Swing> {
                     }
                   ),
                 if(mAcceleration == 0  && mode == "")
-                  SizedBox(width: 10,),
+                  SizedBox(width: 20,),
                 if(mAcceleration == 0 && mode != "right")
                   MaterialButton(
                     padding: const EdgeInsets.symmetric(vertical: 5.0, horizontal: 20.0),
@@ -294,12 +297,15 @@ class _SwingState extends State<Swing> {
   }
 
   stop() async {
+    if (_accelSubscription == null) return;
+
     if(_accelAvailable) {
       if(swingCount > 0) {
         dirty = true;
         list[0][mode] = swingCount + (list[0][mode] as int);
         recorder[mode] = swingCount + (recorder[mode] as int);
         await Storage.setJSON("swing", list);
+        swingCount = 0;
         setState(() {});
       }
       tts.speak("stop");
