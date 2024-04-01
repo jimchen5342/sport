@@ -36,7 +36,7 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return SafeArea(
       child: MaterialApp(
-        // debugShowCheckedModeBanner: false,
+        debugShowCheckedModeBanner: false,
         theme: ThemeData(
           primarySwatch: Colors.blue,
         ),
@@ -83,14 +83,17 @@ class _HomePageState extends State<_HomePage> {
     return Scaffold(
       appBar: AppBar(
           // leading: IconButton(
-          //   icon: const Icon(
-          //     Icons.arrow_back_ios_sharp,
-          //     color: Colors.white,
-          //   ),
+          //   icon: const Icon( Icons.arrow_back_ios_sharp, color: Colors.white ),
           //   onPressed: () => Navigator.pop(context),
           // ),
           title: const Text('運動', style: TextStyle( color:Colors.white,) ),
-          // actions: [Text("First action")],
+          actions: [
+            // IconButton( icon: Icon( Icons.menu, color: Colors.white),
+            //   onPressed: () {
+            //     // setState(() { });
+            //   },
+            // )
+          ],
           backgroundColor: Colors.blue, 
         ),
       body: Container(
@@ -108,7 +111,7 @@ class _HomePageState extends State<_HomePage> {
                     onTap: ()  {
                       active = index;
                       setState(() {
-                        alert(context, index);
+                        alert(index);
                       });                      
                     },
                     onLongPress: (){
@@ -149,37 +152,37 @@ class _HomePageState extends State<_HomePage> {
     );
   }
 
-  Future<void> alert(BuildContext context, index) {
+  Future<void> alert(index) { // BuildContext context, 
     return showDialog<void>(
-    context: context,
-    builder: (BuildContext context) {
-      return AlertDialog(
-        title: Text('運動'),
-        content: const Text('確定刪除資料？'),
-        actions: <Widget>[
-          TextButton(
-            child: Text('確定'),
-            onPressed: () async {
-              list.removeAt(index);
-              await Storage.setJSON("swing", list);
-              active = -1;
-              setState(() {});
-              Navigator.of(context).pop();
-            },
-          ),
-          TextButton(
-            child: Text('取消'),
-            onPressed: () {
-              active = -1;
-              setState(() {});
-              Navigator.of(context).pop();
-            },
-          ),
-        ],
-      );
-    },
-  );
-    
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('運動'),
+          // barrierDismissible: false,
+          content: const Text('確定刪除資料？'),
+          actions: <Widget>[
+            TextButton(
+              child: Text('確定'),
+              onPressed: () async {
+                list.removeAt(index);
+                await Storage.setJSON("swing", list);
+                active = -1;
+                setState(() {});
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: Text('取消'),
+              onPressed: () {
+                active = -1;
+                setState(() {});
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
   Widget rowRender(int index) {
     return Container(
