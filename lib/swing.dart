@@ -18,10 +18,11 @@ class _SwingState extends State<Swing> {
   int mAccelerationStand = 18, mAcceleration = 0, 
     mShakeTimeStand = 800, mShakeTimestamp = 0;
   TTS tts = TTS();
-  String recorders = "", direction = "", mode = "";
+  String history = "", direction = "", mode = "";
   var dirty = false;
-  var recorder = {"date": "", "left": 0, "right": 0};
+  var recorder = {"left": 0, "right": 0};
   List<dynamic> list = [];
+  bool debug = false;
 
   @override
   void initState() {
@@ -31,8 +32,7 @@ class _SwingState extends State<Swing> {
       var curr = DateTime.now();
       var today = "$curr".substring(0, 10);
       if(list.length == 0 || (list.length > 0 && list[0]["date"] != today)) {
-        recorder["date"] = today;
-        list.insert(0, recorder);
+        list.insert(0, {"date": today, "left": 0, "right": 0});
       }
 
       try {
@@ -79,7 +79,7 @@ class _SwingState extends State<Swing> {
     if (_accelSubscription != null) return;
     if (_accelAvailable) {
       swingCount = 0;
-      recorders = "";
+      history = "";
       final stream = await SensorManager().sensorUpdates(
         sensorId: Sensors.ACCELEROMETER,
         interval: Sensors.SENSOR_DELAY_UI, //  Sensors.SENSOR_DELAY_FASTEST,
@@ -109,8 +109,8 @@ class _SwingState extends State<Swing> {
 
           var curr = DateTime.now();
           var time = "$curr".substring(11, 23);
-          recorders = swingCount.toString() + ". " + time + ": " + mAcceleration.toString() 
-            + (recorders.isNotEmpty ? "\n" : "") + recorders;
+          history = swingCount.toString() + ". " + time + ": " + mAcceleration.toString() 
+            + (history.isNotEmpty ? "\n" : "") + history;
 
           mShakeTimestamp = now;
         }
@@ -169,72 +169,92 @@ class _SwingState extends State<Swing> {
   }
 
   Widget body() {
-    int left = list.length > 0 ? (list[0]["left"] as int) - (recorder["left"] as int) : 0;
-    int right = list.length > 0 ? (list[0]["right"] as int) - (recorder["right"] as int) : 0;
+    int left = list.length > 0 ? (list[0]["left"] as int) : 0; //  - (recorder["left"] as int)
+    int right = list.length > 0 ? (list[0]["right"] as int) : 0; // - (recorder["right"] as int)
     return Container(
       padding: const EdgeInsets.all(10.0),
       alignment: AlignmentDirectional.topCenter,
       child: Column(
         children: <Widget>[
-          Expanded(
-            flex: 1, 
-            child: Container(
-              // decoration: BoxDecoration(
-              //   // border: Border.all(color: Colors.grey),
-              // ),
-              width: double.infinity,
-              padding: EdgeInsets.all(5.0),
-              child: Column(children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Text("左腳：",
-                        style: TextStyle(
-                          // color:Colors.white,
-                          fontSize: 20
-                        )
-                      ),
-                    if(list.length > 0)                
-                      BorderOfText(left.toString(), disabled: true),
-                    BorderOfText((recorder["left"] as int).toString())
-                  ]
-                ),
-                SizedBox(height: 20),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Text("右腳：",
+          Container(
+            width: double.infinity,
+            padding: EdgeInsets.all(5.0),
+            child: Column(children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Text("左腳：",
                       style: TextStyle(
                         // color:Colors.white,
                         fontSize: 20
                       )
                     ),
-                    if(list.length > 0)                
-                      BorderOfText(right.toString(), disabled: true),
-                    BorderOfText((recorder["right"] as int).toString())
-                  ]
-                )
-              ],)
-            ),  
-          ),
+                  if(list.length > 0)                
+                    BorderOfText(left.toString(), disabled: true),
+                  BorderOfText((recorder["left"] as int).toString())
+                ]
+              ),
+              SizedBox(height: 20),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Text("右腳：",
+                    style: TextStyle(
+                      // color:Colors.white,
+                      fontSize: 20
+                    )
+                  ),
+                  if(list.length > 0)                
+                    BorderOfText(right.toString(), disabled: true),
+                  BorderOfText((recorder["right"] as int).toString())
+                ]
+              )
+            ],)
+          ),  
           Expanded(
             flex: 1, 
-            child: Text(
-            "次數：${swingCount}",
-            style: const TextStyle(
-              // color:Colors.white,
-              fontSize: 50
-            ),
-            textAlign: TextAlign.center,
-          ),),
+            child: 
+              // Container(
+              //   decoration: BoxDecoration(
+              //     border: Border.all(color: Colors.grey),
+              //   ),
+              //   width: double.infinity,
+              //   padding: EdgeInsets.all(5.0),
+              //   child: SingleChildScrollView(child: 
+              //     Text(history,
+              //       style: const TextStyle(
+              //         fontSize: 16
+              //       ),  
+              //       maxLines: 300,
+              //       textAlign: TextAlign.center,
+              //     ),
+              //   )
+              // ),  
+              Text(
+                "次數：${swingCount}",
+                style: const TextStyle(
+                  // color:Colors.white,
+                  fontSize: 50
+                ),
+                textAlign: TextAlign.center,
+              ),
+          ),
           const Padding(padding: EdgeInsets.only(top: 5.0)),
           if(_accelAvailable == true)
             Row(
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: <Widget>[
+                // Text(
+                //   "次數：${swingCount}",
+                //   style: const TextStyle(
+                //     // color:Colors.white,
+                //     fontSize: 20
+                //   ),
+                //   textAlign: TextAlign.center,
+                // ),
                 Expanded( flex: 1,  child: Container() ),
                 if(mAcceleration == 0 && mode != "left")
                   MaterialButton(
@@ -300,10 +320,16 @@ class _SwingState extends State<Swing> {
     if (_accelSubscription == null) return;
 
     if(_accelAvailable) {
+      history = "swingCount: " + swingCount.toString() + "\n" + history;
       if(swingCount > 0) {
         dirty = true;
-        list[0][mode] = swingCount + (list[0][mode] as int);
-        recorder[mode] = swingCount + (recorder[mode] as int);
+        int old = list[0][mode] as int;
+        list[0][mode] = swingCount + old;
+        history = "list: " + old.toString() + ", " + (list[0][mode] as int).toString() + "\n" + history;
+
+        old = recorder[mode] as int;
+        recorder[mode] = swingCount + old;
+        history = "recorder: " + old.toString() + ", " + (recorder[mode] as int).toString() + "\n" + history;
         await Storage.setJSON("swing", list);
         swingCount = 0;
         setState(() {});
