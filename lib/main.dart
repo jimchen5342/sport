@@ -2,6 +2,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:./sport/swing.dart';
 import 'package:./sport/system/storage.dart';
+import 'package:./sport/system/alert.dart';
+import 'package:device_info_plus/device_info_plus.dart';
 
 /*
 device_info_plus
@@ -88,11 +90,11 @@ class _HomePageState extends State<_HomePage> {
           // ),
           title: const Text('運動', style: TextStyle( color:Colors.white,) ),
           actions: [
-            // IconButton( icon: Icon( Icons.menu, color: Colors.white),
-            //   onPressed: () {
-            //     // setState(() { });
-            //   },
-            // )
+            IconButton( icon: Icon( Icons.menu, color: Colors.white),
+              onPressed: () {
+                showInfo();
+              },
+            )
           ],
           backgroundColor: Colors.blue, 
         ),
@@ -111,7 +113,7 @@ class _HomePageState extends State<_HomePage> {
                     onTap: ()  {
                       active = index;
                       setState(() {
-                        alert(index);
+                        remove(index);
                       });                      
                     },
                     onLongPress: (){
@@ -152,37 +154,112 @@ class _HomePageState extends State<_HomePage> {
     );
   }
 
-  Future<void> alert(index) { // BuildContext context, 
-    return showDialog<void>(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('運動'),
-          // barrierDismissible: false,
-          content: const Text('確定刪除資料？'),
-          actions: <Widget>[
-            TextButton(
-              child: Text('確定'),
-              onPressed: () async {
-                list.removeAt(index);
-                await Storage.setJSON("swing", list);
-                active = -1;
-                setState(() {});
-                Navigator.of(context).pop();
-              },
-            ),
-            TextButton(
-              child: Text('取消'),
-              onPressed: () {
-                active = -1;
-                setState(() {});
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
+  void remove(index) {
+    alert(context, '確定刪除資料？', btns: [
+      TextButton(
+        child: Text('確定'),
+        onPressed: () async {
+          list.removeAt(index);
+          await Storage.setJSON("swing", list);
+          active = -1;
+          setState(() {});
+          Navigator.of(context).pop();
+        },
+      ),
+      TextButton(
+        child: Text('取消'),
+        onPressed: () {
+          active = -1;
+          setState(() {});
+          Navigator.of(context).pop();
+        },
+      )
+    ]);
+    // return showDialog<void>(
+    //   context: context,
+    //   builder: (BuildContext context) {
+    //     return AlertDialog(
+    //       title: Text('運動'),
+    //       // barrierDismissible: false,
+    //       content: const Text('確定刪除資料？'),
+    //       actions: <Widget>[
+    //         TextButton(
+    //           child: Text('確定'),
+    //           onPressed: () async {
+    //             list.removeAt(index);
+    //             await Storage.setJSON("swing", list);
+    //             active = -1;
+    //             setState(() {});
+    //             Navigator.of(context).pop();
+    //           },
+    //         ),
+    //         TextButton(
+    //           child: Text('取消'),
+    //           onPressed: () {
+    //             active = -1;
+    //             setState(() {});
+    //             Navigator.of(context).pop();
+    //           },
+    //         ),
+    //       ],
+    //     );
+    //   },
+    // );
+  }
+
+  showInfo() async {
+    DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
+    Map<String, dynamic> deviceData = <String, dynamic>{};
+    deviceData = _readAndroidBuildData(await deviceInfo.androidInfo);
+    // debugPrint('device ${deviceData['platform']}'); //系統名稱
+    // debugPrint('device ${deviceData['brand']}'); //品牌
+    // debugPrint('device ${deviceData['model']}'); //型號
+    // debugPrint('device ${deviceData['version.release']}'); //版本
+    // debugPrint('device ${deviceData['isPhysicalDevice']}'); //是否為物理設
+
+    deviceData.forEach((key, value) {
+      debugPrint('${key} ${value}'); //系統名稱
+    });
+  }
+
+  Map<String, dynamic> _readAndroidBuildData(AndroidDeviceInfo build) {
+    return <String, dynamic>{
+      'platform': 'Android',
+      'version.securityPatch': build.version.securityPatch,
+      'version.sdkInt': build.version.sdkInt,
+      'version.release': build.version.release,
+      'version.previewSdkInt': build.version.previewSdkInt,
+      'version.incremental': build.version.incremental,
+      'version.codename': build.version.codename,
+      'version.baseOS': build.version.baseOS,
+      'board': build.board,
+      'bootloader': build.bootloader,
+      'brand': build.brand,
+      'device': build.device,
+      'display': build.display,
+      'fingerprint': build.fingerprint,
+      'hardware': build.hardware,
+      'host': build.host,
+      'id': build.id,
+      'manufacturer': build.manufacturer,
+      'model': build.model,
+      'product': build.product,
+      'supported32BitAbis': build.supported32BitAbis,
+      'supported64BitAbis': build.supported64BitAbis,
+      'supportedAbis': build.supportedAbis,
+      'tags': build.tags,
+      'type': build.type,
+      'isPhysicalDevice': build.isPhysicalDevice,
+      'systemFeatures': build.systemFeatures,
+      'displaySizeInches':
+          ((build.displayMetrics.sizeInches * 10).roundToDouble() / 10),
+      'displayWidthPixels': build.displayMetrics.widthPx,
+      'displayWidthInches': build.displayMetrics.widthInches,
+      'displayHeightPixels': build.displayMetrics.heightPx,
+      'displayHeightInches': build.displayMetrics.heightInches,
+      'displayXDpi': build.displayMetrics.xDpi,
+      'displayYDpi': build.displayMetrics.yDpi,
+    };
   }
   Widget rowRender(int index) {
     return Container(
@@ -235,5 +312,4 @@ class _HomePageState extends State<_HomePage> {
       ),
     );
   }
-
 }

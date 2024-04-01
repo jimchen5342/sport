@@ -192,7 +192,13 @@ class _SwingState extends State<Swing> {
                     ),
                   if(list.length > 0)                
                     BorderOfText(left.toString(), disabled: true),
-                  BorderOfText((recorder["left"] as int).toString())
+                  BorderOfText((recorder["left"] as int).toString()),
+                  if((recorder["left"] as int) > 0)
+                    IconButton( icon: Icon( Icons.highlight_remove, color: Colors.blue),
+                      onPressed: () {
+                        reset("left");
+                      },
+                    )
                 ]
               ),
               SizedBox(height: 20),
@@ -208,7 +214,14 @@ class _SwingState extends State<Swing> {
                   ),
                   if(list.length > 0)                
                     BorderOfText(right.toString(), disabled: true),
-                  BorderOfText((recorder["right"] as int).toString())
+                  BorderOfText((recorder["right"] as int).toString()),
+
+                  if((recorder["right"] as int) > 0)
+                    IconButton( icon: Icon( Icons.highlight_remove, color: Colors.blue),
+                      onPressed: () {
+                        reset("right");
+                      },
+                    )
                 ]
               )
             ],)
@@ -339,6 +352,16 @@ class _SwingState extends State<Swing> {
     }
   }
   
+  reset(mode) async {
+    int value1 = list[0][mode] as int;
+    int value2 = recorder[mode] as int;
+    list[0][mode] = value1 - value2;
+    recorder[mode] = 0;
+    await Storage.setJSON("swing", list);
+
+    setState(() { });
+  }
+
   Widget BorderOfText(String text, {bool disabled = false}) {
     return Container(
       width: 100,
