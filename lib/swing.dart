@@ -169,8 +169,8 @@ class _SwingState extends State<Swing> {
   }
 
   Widget body() {
-    int left = list.length > 0 ? (list[0]["left"] as int) : 0; //  - (recorder["left"] as int)
-    int right = list.length > 0 ? (list[0]["right"] as int) : 0; // - (recorder["right"] as int)
+    int left = list.length > 0 ? (list[0]["left"] as int) - (recorder["left"] as int) : 0;
+    int right = list.length > 0 ? (list[0]["right"] as int) - (recorder["right"] as int) : 0;
     return Container(
       padding: const EdgeInsets.all(10.0),
       alignment: AlignmentDirectional.topCenter,

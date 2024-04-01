@@ -3,6 +3,17 @@ import 'package:flutter/material.dart';
 import 'package:./sport/swing.dart';
 import 'package:./sport/system/storage.dart';
 
+/*
+device_info_plus
+Future<String?> getAndroidVersion() async {
+  if (Platform.isAndroid) {
+    DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
+    AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
+    return androidInfo.version.release;
+  }
+  throw UnsupportedError("Platform is not Android");
+}
+ */
 void main() => runApp(MyApp());
 
 class MyApp extends StatefulWidget {
@@ -221,7 +232,5 @@ class _HomePageState extends State<_HomePage> {
       ),
     );
   }
-
-
 
 }
