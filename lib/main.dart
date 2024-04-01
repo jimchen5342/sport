@@ -3,19 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:./sport/swing.dart';
 import 'package:./sport/system/storage.dart';
 import 'package:./sport/system/alert.dart';
-import 'package:device_info_plus/device_info_plus.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
-/*
-device_info_plus
-Future<String?> getAndroidVersion() async {
-  if (Platform.isAndroid) {
-    DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
-    AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
-    return androidInfo.version.release;
-  }
-  throw UnsupportedError("Platform is not Android");
-}
- */
 void main() => runApp(MyApp());
 
 class MyApp extends StatefulWidget {
@@ -208,59 +197,11 @@ class _HomePageState extends State<_HomePage> {
   }
 
   showInfo() async {
-    DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
-    Map<String, dynamic> deviceData = <String, dynamic>{};
-    deviceData = _readAndroidBuildData(await deviceInfo.androidInfo);
-    // debugPrint('device ${deviceData['platform']}'); //系統名稱
-    // debugPrint('device ${deviceData['brand']}'); //品牌
-    // debugPrint('device ${deviceData['model']}'); //型號
-    // debugPrint('device ${deviceData['version.release']}'); //版本
-    // debugPrint('device ${deviceData['isPhysicalDevice']}'); //是否為物理設
-
-    deviceData.forEach((key, value) {
-      debugPrint('${key} ${value}'); //系統名稱
-    });
+    PackageInfo packageInfo = await PackageInfo.fromPlatform();
+    String version = packageInfo.version;
+    alert(context, "Version Name:\n" + version + "");
   }
 
-  Map<String, dynamic> _readAndroidBuildData(AndroidDeviceInfo build) {
-    return <String, dynamic>{
-      'platform': 'Android',
-      'version.securityPatch': build.version.securityPatch,
-      'version.sdkInt': build.version.sdkInt,
-      'version.release': build.version.release,
-      'version.previewSdkInt': build.version.previewSdkInt,
-      'version.incremental': build.version.incremental,
-      'version.codename': build.version.codename,
-      'version.baseOS': build.version.baseOS,
-      'board': build.board,
-      'bootloader': build.bootloader,
-      'brand': build.brand,
-      'device': build.device,
-      'display': build.display,
-      'fingerprint': build.fingerprint,
-      'hardware': build.hardware,
-      'host': build.host,
-      'id': build.id,
-      'manufacturer': build.manufacturer,
-      'model': build.model,
-      'product': build.product,
-      'supported32BitAbis': build.supported32BitAbis,
-      'supported64BitAbis': build.supported64BitAbis,
-      'supportedAbis': build.supportedAbis,
-      'tags': build.tags,
-      'type': build.type,
-      'isPhysicalDevice': build.isPhysicalDevice,
-      'systemFeatures': build.systemFeatures,
-      'displaySizeInches':
-          ((build.displayMetrics.sizeInches * 10).roundToDouble() / 10),
-      'displayWidthPixels': build.displayMetrics.widthPx,
-      'displayWidthInches': build.displayMetrics.widthInches,
-      'displayHeightPixels': build.displayMetrics.heightPx,
-      'displayHeightInches': build.displayMetrics.heightInches,
-      'displayXDpi': build.displayMetrics.xDpi,
-      'displayYDpi': build.displayMetrics.yDpi,
-    };
-  }
   Widget rowRender(int index) {
     return Container(
       decoration: BoxDecoration(
