@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:./sport/swing.dart';
 import 'package:./sport/system/storage.dart';
@@ -58,7 +57,7 @@ class _HomePageState extends State<_HomePage> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance?.addPostFrameCallback((_) async {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
       // await Storage.clear();
       list = await Storage.getJSON("swing");
       setState(() {});

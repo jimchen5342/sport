@@ -26,11 +26,11 @@ class _SwingState extends State<Swing> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance?.addPostFrameCallback((_) async {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
       list = await Storage.getJSON("swing");
       var curr = DateTime.now();
       var today = "$curr".substring(0, 10);
-      if(list.length == 0 || (list.length > 0 && list[0]["date"] != today)) {
+      if(list.isEmpty || (list.isNotEmpty && list[0]["date"] != today)) {
         list.insert(0, {"date": today, "left": 0, "right": 0});
       }
 
@@ -108,8 +108,7 @@ class _SwingState extends State<Swing> {
 
           var curr = DateTime.now();
           var time = "$curr".substring(11, 23);
-          history = swingCount.toString() + ". " + time + ": " + mAcceleration.toString() 
-            + (history.isNotEmpty ? "\n" : "") + history;
+          history = "$swingCount. $time: $mAcceleration${history.isNotEmpty ? "\n" : ""}$history";
 
           mShakeTimestamp = now;
         }
@@ -137,10 +136,12 @@ class _SwingState extends State<Swing> {
         list.removeAt(0);
         await Storage.setJSON("swing", list);
       }
+      if (!context.mounted) return;
       Navigator.of(context).pop(sum2 > 0 ? true : false); 
     }
   }
 
+  @override
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
@@ -174,8 +175,8 @@ class _SwingState extends State<Swing> {
   }
 
   Widget body() {
-    int left = list.length > 0 ? (list[0]["left"] as int) - (recorder["left"] as int) : 0;
-    int right = list.length > 0 ? (list[0]["right"] as int) - (recorder["right"] as int) : 0;
+    int left = list.isNotEmpty ? (list[0]["left"] as int) - (recorder["left"] as int) : 0;
+    int right = list.isNotEmpty ? (list[0]["right"] as int) - (recorder["right"] as int) : 0;
     return Container(
       padding: const EdgeInsets.all(10.0),
       alignment: AlignmentDirectional.topCenter,
@@ -183,21 +184,21 @@ class _SwingState extends State<Swing> {
         children: <Widget>[
           Container(
             width: double.infinity,
-            padding: EdgeInsets.all(5.0),
+            padding: const EdgeInsets.all(5.0),
             child: Column(children: [
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Text("左腳：",
+                  const Text("左腳：",
                       style: TextStyle(
                         // color:Colors.white,
                         fontSize: 20
                       )
                     ),
-                  if(list.length > 0)                
-                    BorderOfText(left.toString(), disabled: true),
-                  BorderOfText((recorder["left"] as int).toString()),
+                  if(list.isNotEmpty)                
+                    borderOfText(left.toString(), disabled: true),
+                  borderOfText((recorder["left"] as int).toString()),
                   IconButton(
                     iconSize: 30,
                     icon: Icon( 
@@ -205,26 +206,27 @@ class _SwingState extends State<Swing> {
                       color: recorder["left"] as int > 0 ? Colors.orange : Colors.grey.shade400
                     ),
                     onPressed: () {
-                      if(recorder["left"] as int > 0)
+                      if(recorder["left"] as int > 0) {
                         reset("left");
+                      }
                     },
                   )
                 ]
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Text("右腳：",
+                  const Text("右腳：",
                     style: TextStyle(
                       // color:Colors.white,
                       fontSize: 20
                     )
                   ),
-                  if(list.length > 0)                
-                    BorderOfText(right.toString(), disabled: true),
-                  BorderOfText((recorder["right"] as int).toString()),
+                  if(list.isNotEmpty)                
+                    borderOfText(right.toString(), disabled: true),
+                  borderOfText((recorder["right"] as int).toString()),
 
                   IconButton(
                     iconSize: 30,
@@ -233,8 +235,9 @@ class _SwingState extends State<Swing> {
                       color: recorder["right"] as int > 0 ? Colors.orange : Colors.grey.shade400
                     ),
                     onPressed: () {
-                      if(recorder["right"] as int > 0)
+                      if(recorder["right"] as int > 0) {
                         reset("right");
+                      }
                     },
                   )
                 ]
@@ -265,7 +268,7 @@ class _SwingState extends State<Swing> {
               //   )
               // ),  
               Text(
-                "次數：${swingCount}",
+                "次數：$swingCount",
                 style: const TextStyle(
                   // color:Colors.white,
                   fontSize: 50
@@ -283,9 +286,9 @@ class _SwingState extends State<Swing> {
   }
 
   Widget footer() {
-    bool _left = mAcceleration == 0 && mode != "left" ? true : false;
-    bool _right = mAcceleration == 0 && mode != "right" ? true : false;
-    bool _stop = mAcceleration > 0 ? true : false;
+    bool mLeft = mAcceleration == 0 && mode != "left" ? true : false;
+    bool mRight = mAcceleration == 0 && mode != "right" ? true : false;
+    bool mStop = mAcceleration > 0 ? true : false;
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -294,58 +297,58 @@ class _SwingState extends State<Swing> {
         // Expanded( flex: 1,  child: Container() ),
           MaterialButton(
             padding: const EdgeInsets.symmetric(vertical: 5.0, horizontal: 20.0),
-            child: Text("左腳",
-              style: TextStyle(
-                color: _left ? Colors.white : Colors.grey.shade400,
-                fontSize: 18
-              )
-            ),
-            color: _left ? Colors.green : Colors.grey.shade100,
-            onPressed: 
-            () {
-              if(_accelAvailable && _left) {
+            color: mLeft ? Colors.green : Colors.grey.shade100,
+            onPressed: () {
+              if(_accelAvailable && mLeft) {
                 tts.speak("start");
                 mode = "left";
                 _startAccelerometer();
               }
-            }
+            },
+            child: Text("左腳",
+              style: TextStyle(
+                color: mLeft ? Colors.white : Colors.grey.shade400,
+                fontSize: 18
+              )
+            )
           ),
         
-          SizedBox(width: 20,),
+          const SizedBox(width: 20,),
         
           MaterialButton(
             padding: const EdgeInsets.symmetric(vertical: 5.0, horizontal: 20.0),
+            color: mRight ? Colors.green : Colors.grey.shade100,
+            onPressed: () {
+                if(_accelAvailable && mRight) {
+                  tts.speak("start");
+                  mode = "right";
+                  _startAccelerometer();
+                }
+            },
             child: Text("右腳",
               style: TextStyle(
-                color:_right ? Colors.white  : Colors.grey.shade400,
+                color:mRight ? Colors.white  : Colors.grey.shade400,
                 fontSize: 18
               )
-            ),
-            color: _right ? Colors.green : Colors.grey.shade100,
-            onPressed:() {
-                if(_accelAvailable && _right) {
-                tts.speak("start");
-                mode = "right";
-                _startAccelerometer();
-                }
-            }
+            )
           ),
           
-          SizedBox(width: 20,),
+          const SizedBox(width: 20,),
           
           MaterialButton(
             padding: const EdgeInsets.symmetric(vertical: 5.0, horizontal: 30.0),
+            color: mStop ? Colors.red  : Colors.grey.shade100,
+            onPressed: () async {
+              if(mStop) {
+                await stop();
+              }
+            },
             child: Text("結束",
               style: TextStyle(
-                color:_stop ? Colors.white  : Colors.grey.shade400,
+                color: mStop ? Colors.white  : Colors.grey.shade400,
                 fontSize: 18
               )
-            ),
-            color: _stop ? Colors.red  : Colors.grey.shade100,
-            onPressed:() async {
-              if(_stop)
-                await stop();
-            }
+            )
           ),
       ],
     );
@@ -355,7 +358,7 @@ class _SwingState extends State<Swing> {
     if (_accelSubscription == null) return;
 
     if(_accelAvailable) {
-      history = "swingCount: " + swingCount.toString() + "\n" + history;
+      history = "swingCount: $swingCount\n$history";
       if(swingCount > 0) {
         int old = list[0][mode] as int;
         list[0][mode] = swingCount + old;
@@ -383,7 +386,7 @@ class _SwingState extends State<Swing> {
     setState(() { });
   }
 
-  Widget BorderOfText(String text, {bool disabled = false}) {
+  Widget borderOfText(String text, {bool disabled = false}) {
     return Container(
       width: 80,
       padding: const EdgeInsets.symmetric(vertical: 2.0, horizontal: 10.0),
