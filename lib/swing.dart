@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_sensors/flutter_sensors.dart';
 import 'package:sport/system/tts.dart';
 import 'package:./sport/system/storage.dart';
+import 'package:./sport/swingSetup.dart';
 
 class Swing extends StatefulWidget {
   // Swing({Key? key}) : super(key: key){
@@ -156,7 +157,13 @@ class _SwingState extends State<Swing> {
           title: const Text('單腳擺動',
             style: TextStyle( color:Colors.white,)
           ),
-          // actions: [Text("First action")],
+          actions: [
+            IconButton( icon: Icon( Icons.menu, color: Colors.white),
+              onPressed: () {
+                setup();
+              },
+            )
+          ],
           backgroundColor: Colors.blue, 
         ),
         body:
@@ -250,31 +257,14 @@ class _SwingState extends State<Swing> {
           ),
           Expanded(
             flex: 2, 
-            child: 
-              // Container(
-              //   decoration: BoxDecoration(
-              //     border: Border.all(color: Colors.grey),
-              //   ),
-              //   width: double.infinity,
-              //   padding: EdgeInsets.all(5.0),
-              //   child: SingleChildScrollView(child: 
-              //     Text(history,
-              //       style: const TextStyle(
-              //         fontSize: 16
-              //       ),  
-              //       maxLines: 300,
-              //       textAlign: TextAlign.center,
-              //     ),
-              //   )
-              // ),  
-              Text(
-                "次數：$swingCount",
-                style: const TextStyle(
-                  // color:Colors.white,
-                  fontSize: 50
-                ),
-                textAlign: TextAlign.center,
+            child: Text(
+              "次數：$swingCount",
+              style: const TextStyle(
+                // color:Colors.white,
+                fontSize: 50
               ),
+              textAlign: TextAlign.center,
+            ),
           ),
           const Padding(padding: EdgeInsets.only(top: 5.0)),
           if(_accelAvailable == true)
@@ -406,4 +396,16 @@ class _SwingState extends State<Swing> {
       )
     );
   }
+
+  setup() async {
+    // int? index = await showDialog<int>(
+    // onTap: () => Navigator.of(context).pop(index),
+    await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return Dialog(child: Setup());
+      },
+    );
+  }
 }
+
