@@ -1,16 +1,20 @@
 import 'package:flutter/material.dart';
 
 class Setup extends StatefulWidget {
-  // Setup({Key? key}) : super(key: key){
-  // }
+  double span, acceleration, speak ;
+  Setup({Key? key, required this.span, required this.acceleration, required this.speak}) : super(key: key){
+  }
   @override
   _SetupState createState() => _SetupState();
 }
 class _SetupState extends State<Setup> {
-
+  double _currentSliderSpeak = 0.0, _currentSliderSpan = 0.0, _currentSliderAcceleration = 0.0;
   @override
   void initState() {
     super.initState();
+    _currentSliderSpeak = widget.speak as double;
+    _currentSliderSpan = widget.span as double;
+    _currentSliderAcceleration = widget.acceleration as double;
   }
   
   @override
@@ -38,22 +42,60 @@ class _SetupState extends State<Setup> {
         // mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          Text("設定",
-              style: const TextStyle(
-                // color:Colors.white,
-                fontSize: 22
-              ),),
+          const Text("設定",
+            style: TextStyle(
+              // color:Colors.white,
+              fontSize: 22
+            )
+          ),
+          if(widget.speak > -1)
+            Row(
+              children: [
+                const Text("語音播報："),
+                Slider(
+                  value: _currentSliderSpeak,
+                  max: 10,
+                  divisions: 5,
+                  label: _currentSliderSpeak.round().toString(),
+                  onChanged: (double value) {
+                    setState(() {
+                      _currentSliderSpeak = value;
+                    });
+                  },
+                ),
+              ]
+            ),
           Row(
             children: [
-              Text("語音播報：")
+              const Text("加速度："),
+              Slider(
+                value: _currentSliderAcceleration,
+                max: 25,
+                min: 15,
+                divisions: 1,
+                label: _currentSliderAcceleration.round().toString(),
+                onChanged: (double value) {
+                  setState(() {
+                    _currentSliderAcceleration = value;
+                  });
+                },
+              ),
             ]
           ),Row(
             children: [
-              Text("加速度：")
-            ]
-          ),Row(
-            children: [
-              Text("時間跨距：")
+              const Text("時間跨距："),
+              Slider(
+                value: _currentSliderSpan,
+                max: 1000,
+                min: 500,
+                divisions: 100,
+                label: _currentSliderSpan.round().toString(),
+                onChanged: (double value) {
+                  setState(() {
+                    _currentSliderSpan = value;
+                  });
+                },
+              ),
             ]
           ),
           SizedBox(height: 40),

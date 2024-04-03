@@ -17,7 +17,7 @@ class _SwingState extends State<Swing> {
   StreamSubscription? _accelSubscription;
   int swingCount = 0;
   int mAccelerationStand = 18, mAcceleration = 0, 
-    mShakeTimeStand = 800, mShakeTimestamp = 0;
+    mShakeTimeStand = 800, mShakeTimestamp = 0, mSpeakStand = 0;
   TTS tts = TTS();
   String history = "", direction = "", mode = "";
   var dirty = false;
@@ -35,10 +35,23 @@ class _SwingState extends State<Swing> {
         list.insert(0, {"date": today, "left": 0, "right": 0});
       }
 
+      mSpeakStand = await Storage.getInt("swing_speak");
+
+      var num = await Storage.getInt("swing_shake_time");
+      if(num != 0) {
+        mShakeTimeStand = num;
+      }
+
+      num = await Storage.getInt("swing_acceleration");
+      if(num != 0) {
+        mAccelerationStand = num;
+      }
+
       try {
         await tts.initial();
         // tts.count();
       } catch (e) {
+        mSpeakStand = -1;
         debugPrint(e.toString());
       } finally {
         _checkAccelerometerStatus();
@@ -103,9 +116,11 @@ class _SwingState extends State<Swing> {
         int now = DateTime.now().millisecondsSinceEpoch;
         if (mShakeTimestamp + mShakeTimeStand < now) {
           swingCount++;
-          // if(swingCount % 5 == 0) {
+          if(mSpeakStand == 0) {
             tts.speak(swingCount.toString());
-          // }
+          } else if(swingCount > 1 && swingCount % mSpeakStand == 0) {
+            tts.speak(swingCount.toString());
+          }
 
           var curr = DateTime.now();
           var time = "$curr".substring(11, 23);
@@ -403,7 +418,11 @@ class _SwingState extends State<Swing> {
     await showDialog(
       context: context,
       builder: (BuildContext context) {
-        return Dialog(child: Setup());
+        return Dialog(child: Setup(
+          acceleration: mAccelerationStand as double,
+          span: mShakeTimeStand as double,
+          speak: mSpeakStand as double
+        ));
       },
     );
   }
