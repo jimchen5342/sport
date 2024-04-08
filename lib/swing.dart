@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:ffi';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_sensors/flutter_sensors.dart';
@@ -17,7 +18,7 @@ class _SwingState extends State<Swing> {
   StreamSubscription? _accelSubscription;
   int swingCount = 0;
   int mAccelerationStand = 18, mAcceleration = 0, 
-    mShakeTimeStand = 800, mShakeTimestamp = 0, mSpeakStand = 0;
+    mSpanStand = 800, mShakeTimestamp = 0, mSpeakStand = 0;
   TTS tts = TTS();
   String history = "", direction = "", mode = "";
   var dirty = false;
@@ -37,9 +38,9 @@ class _SwingState extends State<Swing> {
 
       mSpeakStand = await Storage.getInt("swing_speak");
 
-      var num = await Storage.getInt("swing_shake_time");
+      var num = await Storage.getInt("swing_span");
       if(num != 0) {
-        mShakeTimeStand = num;
+        mSpanStand = num;
       }
 
       num = await Storage.getInt("swing_acceleration");
@@ -114,7 +115,7 @@ class _SwingState extends State<Swing> {
     if (xyz > mAcceleration) { // 往上方向
       if(mAcceleration > mAccelerationStand && direction != "上" ) {
         int now = DateTime.now().millisecondsSinceEpoch;
-        if (mShakeTimestamp + mShakeTimeStand < now) {
+        if (mShakeTimestamp + mSpanStand < now) {
           swingCount++;
           if(mSpeakStand == 0) {
             tts.speak(swingCount.toString());
@@ -413,18 +414,26 @@ class _SwingState extends State<Swing> {
   }
 
   setup() async {
-    // int? index = await showDialog<int>(
-    // onTap: () => Navigator.of(context).pop(index),
-    await showDialog(
+    var result = await showDialog(
       context: context,
       builder: (BuildContext context) {
         return Dialog(child: Setup(
-          acceleration: mAccelerationStand as double,
-          span: mShakeTimeStand as double,
-          speak: mSpeakStand as double
+          acceleration: mAccelerationStand.toDouble(),
+          span: mSpanStand.toDouble(),
+          speak: mSpeakStand.toDouble()
         ));
       },
     );
+    if(result != null) {
+      mSpeakStand = (result["speak"] as double).toInt();
+      await Storage.setInt("swing_speak", mSpeakStand);
+
+      mAccelerationStand = (result["acceleration"] as double).toInt();
+      await Storage.setInt("swing_acceleration", mAccelerationStand);
+
+      mSpanStand = (result["span"] as double).toInt();
+      await Storage.setInt("swing_span", mSpanStand);
+    }
   }
 }
 

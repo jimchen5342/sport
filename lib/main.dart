@@ -119,12 +119,6 @@ class _HomePageState extends State<_HomePage> {
               children: <Widget>[
                   MaterialButton(
                     padding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 30.0),
-                    child:  Text("運動",
-                      style: TextStyle(
-                        color:Colors.white,
-                        fontSize: 18
-                      )
-                    ),
                     color: Colors.blue,
                     onPressed:() async {
                       bool dirty = await Navigator.of(context).pushNamed('/swing') as bool;
@@ -132,7 +126,13 @@ class _HomePageState extends State<_HomePage> {
                         list = await Storage.getJSON("swing");
                         setState(() {});
                       }
-                    }
+                    },
+                    child: const Text("單腳擺動",
+                      style: TextStyle(
+                        color:Colors.white,
+                        fontSize: 18
+                      )
+                    ),
                   ),
               ],
             ),
