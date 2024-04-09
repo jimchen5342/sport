@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:ffi';
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_sensors/flutter_sensors.dart';
 import 'package:sport/system/tts.dart';
 import 'package:./sport/system/storage.dart';
@@ -24,6 +25,7 @@ class _SwingState extends State<Swing> {
   var dirty = false;
   var recorder = {"left": 0, "right": 0};
   List<dynamic> list = [];
+  final methodChannel = const MethodChannel('com.flutter/MethodChannel');
 
   @override
   void initState() {
@@ -117,7 +119,9 @@ class _SwingState extends State<Swing> {
         int now = DateTime.now().millisecondsSinceEpoch;
         if (mShakeTimestamp + mSpanStand < now) {
           swingCount++;
-          if(mSpeakStand == 0) {
+          if(mSpeakStand == -1) {
+            methodChannel.invokeMethod('beep');
+          } else if(mSpeakStand == 0) {
             tts.speak(swingCount.toString());
           } else if(swingCount > 1 && swingCount % mSpeakStand == 0) {
             tts.speak(swingCount.toString());

@@ -112,13 +112,13 @@ class _HomePageState extends State<_HomePage> {
                 }
               )
             ),
-            SizedBox(height: 10,),
+            const SizedBox(height: 10,),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: <Widget>[
                   MaterialButton(
-                    padding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 30.0),
+                    padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 30.0),
                     color: Colors.blue,
                     onPressed:() async {
                       bool dirty = await Navigator.of(context).pushNamed('/swing') as bool;
