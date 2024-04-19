@@ -119,12 +119,17 @@ class _SwingState extends State<Swing> {
         int now = DateTime.now().millisecondsSinceEpoch;
         if (mShakeTimestamp + mSpanStand < now) {
           swingCount++;
+          var count = swingCount;
+          if(count > 100 && count % 100 > 0) {
+            count = count % 100;
+          }
+
           if(mSpeakStand == -1) {
             methodChannel.invokeMethod('beep');
           } else if(mSpeakStand == 0) {
-            tts.speak(swingCount.toString());
+            tts.speak(count.toString());
           } else if(swingCount > 1 && swingCount % mSpeakStand == 0) {
-            tts.speak(swingCount.toString());
+            tts.speak(count.toString());
           }
 
           var curr = DateTime.now();
