@@ -1,11 +1,6 @@
-import 'dart:async';
-import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_sensors/flutter_sensors.dart';
-import 'package:sport/system/tts.dart';
 import 'package:./sport/system/storage.dart';
-import 'package:./sport/swingSetup.dart';
 
 class Clock extends StatefulWidget {
   // Clock({Key? key}) : super(key: key){
