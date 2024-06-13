@@ -14,14 +14,19 @@ import io.flutter.embedding.engine.FlutterEngine;
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugins.GeneratedPluginRegistrant;
+// import com.ixsans.text_to_speech.Tts;
 
 public class MainActivity extends FlutterActivity {
     private MediaPlayer mPlayer = null;
+    // private Tts tts;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         // 在螢幕關閉後繼續執行應用程式
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        // tts = new Tts(this.getApplicationContext());
+        // tts.setLanguage("en-US");
+        // tts.speak("hello, jim");
     }
 
     @Override
