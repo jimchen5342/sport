@@ -1,6 +1,10 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:./sport/system/storage.dart';
+import 'package:./sport/system/extension.dart';
+import 'package:sport/system/tts.dart';
 
 class Clock extends StatefulWidget {
   // Clock({Key? key}) : super(key: key){
@@ -10,12 +14,39 @@ class Clock extends StatefulWidget {
 }
 class _ClockState extends State<Clock> {
   final methodChannel = const MethodChannel('com.flutter/MethodChannel');
+  TTS tts = TTS();
+  Timer? _timer;
+  int _count = 0, sec = 5;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
+       try {
+        await tts.initial();
+        count();
+      } catch (e) {
+        
+      // } finally {
+      }
       
+    });
+  }
+
+  void count() {
+    _timer = setInterval(() {
+      _count += sec;
+      tts.speak("${_count}");
+      print("timer: ${_count}," + DateTime.now().format());
+
+    }, Duration(seconds: sec));
+
+    
+  }
+
+  Timer setInterval(void Function() callback, Duration interval) {
+    return Timer.periodic(interval, (Timer timer) {
+      callback();
     });
   }
   
@@ -27,6 +58,7 @@ class _ClockState extends State<Clock> {
   @override
   dispose() {
     super.dispose();
+    _timer!.cancel();
   }
   @override
   void reassemble() async {
