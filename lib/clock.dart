@@ -16,7 +16,9 @@ class _ClockState extends State<Clock> {
   final methodChannel = const MethodChannel('com.flutter/MethodChannel');
   TTS tts = TTS();
   Timer? _timer;
-  int _count = 0, sec = 5;
+  int sec = 30;
+  List<String> list = [];
+  DateTime old = DateTime.now();
 
   @override
   void initState() {
@@ -35,13 +37,17 @@ class _ClockState extends State<Clock> {
 
   void count() {
     _timer = setInterval(() {
-      _count += sec;
-      tts.speak("${_count}");
-      print("timer: ${_count}," + DateTime.now().format());
+      var now = DateTime.now();
 
-    }, Duration(seconds: sec));
-
+      if(now.format(pattern: "HH:mm") != old.format(pattern: "HH:mm")) {
+        tts.speak(now.format(pattern: "HH:mm"));
+      }
     
+      list.insert(0, "時間：${now.format(pattern: "HH:mm:ss")}, 差距：${now.difference(old).inSeconds}");
+
+      old = now;
+      setState(() { });
+    }, Duration(seconds: sec));
   }
 
   Timer setInterval(void Function() callback, Duration interval) {
@@ -96,23 +102,47 @@ class _ClockState extends State<Clock> {
           // ],
           backgroundColor: Colors.blue, 
         ),
-        body:
-          PopScope(
-              canPop: false,
-              onPopInvoked: (bool didPop) {
-                if (didPop) {
-                  return;
-                }
-                backTo();
-              },
-              child: body(),
-            ),
+        body: PopScope(
+          canPop: false,
+          onPopInvoked: (bool didPop) {
+            if (didPop) {
+              return;
+            }
+            backTo();
+          },
+          child: body(),
+        ),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () {},
+          backgroundColor: Colors.blue,
+          foregroundColor: Colors.white,
+          child: const Icon(Icons.add),
+        ),
+        
       )
     );
   }
 
   Widget body() {
-    return Container();
+    return Container(
+        padding: const EdgeInsets.all(5),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Expanded(
+              flex: 1, 
+              child: ListView.builder(
+                itemCount: list.length,
+                itemExtent: 40.0, //强制高度
+                itemBuilder: (BuildContext context, int index) {
+                  return Text(list[index]);
+                }
+              )
+            ),
+          ],
+        ),
+      );
   }
+
 }
 

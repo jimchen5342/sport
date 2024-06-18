@@ -7,7 +7,6 @@ class TTS {
 
   Future<void> initial() async {
     /// populate lang code (i.e. en-US)
-    /// 
     final List<String>? displayLanguages = await tts.getDisplayLanguages();
     if (displayLanguages == null) {
       return;
