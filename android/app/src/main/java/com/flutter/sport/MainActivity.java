@@ -1,4 +1,4 @@
-package com.flutter.sport.sport;
+package com.flutter.sport;
 
 import android.content.res.AssetFileDescriptor;
 import android.content.res.AssetManager;
