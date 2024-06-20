@@ -2,19 +2,8 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:./sport/system/storage.dart';
 import 'package:./sport/system/extension.dart';
 import 'package:sport/system/tts.dart';
-import 'package:workmanager/workmanager.dart';
-
-@pragma('vm:entry-point')
-void callbackDispatcher() {
-  Workmanager().executeTask((task, inputData) {
-    var now = DateTime.now();
-    print("Native called background task: $task ; ${now.format(pattern: "HH:mm")}");
-    return Future.value(true);
-  });
-}
 
 class Clock extends StatefulWidget {
   // Clock({Key? key}) : super(key: key){ }
@@ -32,26 +21,20 @@ class _ClockState extends State<Clock> {
   @override
   void initState() {
     super.initState();
+
     WidgetsBinding.instance.addPostFrameCallback((_) async {
        try {
         await tts.initial();
-        // count();
+        count();
+        // BackgroundService.setToBackground();
       } catch (e) {
         
       // } finally {
       }
 
-      Workmanager().initialize(
-        callbackDispatcher,
-        isInDebugMode: true,
-      );
-      Workmanager().registerPeriodicTask(
-        "1",
-        "simplePeriodicTask",
-        frequency: Duration(seconds: 1),
-      );
-      
     });
+
+
   }
 
   void count() {
@@ -84,7 +67,6 @@ class _ClockState extends State<Clock> {
   dispose() {
     super.dispose();
     _timer!.cancel();
-    Workmanager().cancelAll();
   }
   @override
   void reassemble() async {
