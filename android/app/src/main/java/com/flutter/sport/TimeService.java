@@ -8,10 +8,20 @@ import android.widget.Toast;
 import java.util.Calendar;
 import java.util.Locale;
 
+import io.flutter.Log;
+import io.flutter.embedding.engine.FlutterEngine;
+import io.flutter.embedding.engine.dart.DartExecutor;
+import io.flutter.plugin.common.BasicMessageChannel;
+import io.flutter.plugin.common.StringCodec;
+import io.flutter.view.FlutterMain;
+
 public class TimeService extends Service implements TextToSpeech.OnInitListener {
     private TextToSpeech tts;
     private Handler handler;
     private Runnable runnable;
+
+    private FlutterEngine flutterEngine;
+    private BasicMessageChannel<String> messageChannel;
 
     @Override
     public void onCreate() {
@@ -22,10 +32,29 @@ public class TimeService extends Service implements TextToSpeech.OnInitListener 
             @Override
             public void run() {
                 announceTime();
-                handler.postDelayed(this, 60 * 1000);
+                handler.postDelayed(this, 10 * 1000);
             }
         };
         handler.post(runnable);
+
+        flutterEngine = new FlutterEngine(this);
+
+        messageChannel = new BasicMessageChannel<>(
+                flutterEngine.getDartExecutor(), // .getBinaryMessenger(),
+                "com.flutter/BasicMessageChannel",
+                StringCodec.INSTANCE
+        );
+
+        messageChannel.setMessageHandler((message, reply) -> {
+            Log.i("TimeService", "Received message from Dart: " + message);
+            reply.reply("Message received on Android side");
+        });
+
+        flutterEngine.getDartExecutor().executeDartEntrypoint(
+                DartExecutor.DartEntrypoint.createDefault()
+        );
+
+        Toast.makeText(this, "startService", Toast.LENGTH_SHORT).show();
     }
 
     @Override
@@ -64,9 +93,12 @@ public class TimeService extends Service implements TextToSpeech.OnInitListener 
         Calendar calendar = Calendar.getInstance();
         int hour = calendar.get(Calendar.HOUR_OF_DAY);
         int minute = calendar.get(Calendar.MINUTE);
-        String timeText = String.format(Locale.US, "The time is %02d:%02d", hour, minute);
+        int second = calendar.get(Calendar.SECOND);
+        String timeText = String.format(Locale.US, "The time is %02d:%02d:%02d", hour, minute, second);
 
         Toast.makeText(this, timeText, Toast.LENGTH_SHORT).show();
         tts.speak(timeText, TextToSpeech.QUEUE_FLUSH, null, null);
+
+        messageChannel.send(timeText);
     }
 }

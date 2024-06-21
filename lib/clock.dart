@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+
 import 'package:./sport/system/extension.dart';
 import 'package:sport/system/tts.dart';
 
@@ -13,6 +14,8 @@ class Clock extends StatefulWidget {
 }
 class _ClockState extends State<Clock> {
   final methodChannel = const MethodChannel('com.flutter/MethodChannel');
+  final messageChannel = const BasicMessageChannel<String>("com.flutter/BasicMessageChannel", StringCodec());
+
   TTS tts = TTS();
   Timer? _timer;
   int sec = 30;
@@ -28,8 +31,10 @@ class _ClockState extends State<Clock> {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
        try {
         await tts.initial();
-        count();
-        // BackgroundService.setToBackground();
+        // count();
+
+
+        methodChannel.invokeMethod('startTimer');
       } catch (e) {
         
       // } finally {
@@ -37,6 +42,19 @@ class _ClockState extends State<Clock> {
 
     });
 
+    messageChannel.setMessageHandler((String? message) async {
+      print("Received message from native: $message");
+
+      var now = DateTime.now();
+      // if(now.format(pattern: "HH:mm") != old.format(pattern: "HH:mm")) {
+      //   tts.speak(now.format(pattern: "HH:mm"));
+      // }
+      list.insert(0, "時間：${now.format(pattern: "HH:mm:ss")}, 差距：${now.difference(old).inSeconds}");
+      old = now;
+      setState(() { });
+      // 可以在这里处理来自原生的消息
+      return "Message received on Dart side";
+    });
 
   }
 

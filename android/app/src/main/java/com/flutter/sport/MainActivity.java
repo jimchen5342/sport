@@ -38,9 +38,9 @@ public class MainActivity extends FlutterActivity {
                 "com.flutter/MethodChannel")
                 .setMethodCallHandler(mMethodHandle);
 
-        messageChannel = new BasicMessageChannel(flutterEngine.getDartExecutor(), "com.flutter/BasicMessageChannel",
-                StandardMessageCodec.INSTANCE);
-        messageChannel.setMessageHandler(mMessageHandler);
+//        messageChannel = new BasicMessageChannel(flutterEngine.getDartExecutor(), "com.flutter/BasicMessageChannel",
+//                StandardMessageCodec.INSTANCE);
+//        messageChannel.setMessageHandler(mMessageHandler);
 
 //        messageChannel.send("");
     }
