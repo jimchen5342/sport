@@ -1,5 +1,6 @@
 package com.flutter.sport;
 
+import android.content.Intent;
 import android.content.res.AssetFileDescriptor;
 import android.content.res.AssetManager;
 import android.media.MediaPlayer;
@@ -18,15 +19,13 @@ import io.flutter.plugins.GeneratedPluginRegistrant;
 
 public class MainActivity extends FlutterActivity {
     private MediaPlayer mPlayer = null;
-    // private Tts tts;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         // 在螢幕關閉後繼續執行應用程式
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-        // tts = new Tts(this.getApplicationContext());
-        // tts.setLanguage("en-US");
-        // tts.speak("hello, jim");
+
+
     }
 
     @Override
@@ -44,9 +43,23 @@ public class MainActivity extends FlutterActivity {
         public void onMethodCall(@NonNull MethodCall call, @NonNull MethodChannel.Result result) {
             if(call.method.equals("beep")) {
                 beep();
+            } else if(call.method.equals("startTimer")) {
+                startTimer();
+            } else if(call.method.equals("stopTimer")) {
+                stopTimer();
             }
         }
     };
+
+    void startTimer() {
+        Intent serviceIntent = new Intent(this, TimeService.class);
+        startService(serviceIntent);
+    }
+
+    void stopTimer() {
+        Intent serviceIntent = new Intent(this, TimeService.class);
+        stopService(serviceIntent);
+    }
 
     void beep(){
         if(mPlayer == null) {

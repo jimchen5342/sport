@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:./sport/system/extension.dart';
 import 'package:sport/system/tts.dart';
 
+
 class Clock extends StatefulWidget {
   // Clock({Key? key}) : super(key: key){ }
   @override
@@ -21,6 +22,8 @@ class _ClockState extends State<Clock> {
   @override
   void initState() {
     super.initState();
+    // methodChannel.invokeMethod('startTimer');
+    // methodChannel.invokeMethod('stopTimer');
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
        try {
