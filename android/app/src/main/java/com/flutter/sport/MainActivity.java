@@ -12,20 +12,21 @@ import androidx.annotation.NonNull;
 
 import io.flutter.embedding.android.FlutterActivity;
 import io.flutter.embedding.engine.FlutterEngine;
+import io.flutter.plugin.common.BasicMessageChannel;
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
+import io.flutter.plugin.common.StandardMessageCodec;
 import io.flutter.plugins.GeneratedPluginRegistrant;
 // import com.ixsans.text_to_speech.Tts;
 
 public class MainActivity extends FlutterActivity {
     private MediaPlayer mPlayer = null;
+    BasicMessageChannel messageChannel;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         // 在螢幕關閉後繼續執行應用程式
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-
-
     }
 
     @Override
@@ -36,6 +37,12 @@ public class MainActivity extends FlutterActivity {
                 flutterEngine.getDartExecutor(),
                 "com.flutter/MethodChannel")
                 .setMethodCallHandler(mMethodHandle);
+
+        messageChannel = new BasicMessageChannel(flutterEngine.getDartExecutor(), "com.flutter/BasicMessageChannel",
+                StandardMessageCodec.INSTANCE);
+        messageChannel.setMessageHandler(mMessageHandler);
+
+//        messageChannel.send("");
     }
 
     MethodChannel.MethodCallHandler mMethodHandle = new MethodChannel.MethodCallHandler() {
@@ -51,6 +58,12 @@ public class MainActivity extends FlutterActivity {
         }
     };
 
+    BasicMessageChannel.MessageHandler<Object> mMessageHandler = new BasicMessageChannel.MessageHandler<Object>() {
+        @Override
+        public void onMessage(Object o, BasicMessageChannel.Reply<Object> reply) {
+            reply.reply("messageChannel: 返回给flutter的数据");
+        }
+    };
     void startTimer() {
         Intent serviceIntent = new Intent(this, TimeService.class);
         startService(serviceIntent);
