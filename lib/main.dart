@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:./sport/swing.dart';
-import 'package:./sport/clock.dart';
 import 'package:./sport/system/storage.dart';
 import 'package:./sport/system/alert.dart';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -35,7 +34,6 @@ class _MyAppState extends State<MyApp> {
         routes: <String, WidgetBuilder>{
           '/home': (BuildContext context) => _HomePage(),
           '/swing': (BuildContext context) => Swing(),
-          '/clock': (BuildContext context) => Clock(),
         },
         // home: Scaffold(
         //   body: Swing(),
@@ -131,21 +129,6 @@ class _HomePageState extends State<_HomePage> {
                       }
                     },
                     child: const Text("單腳擺動",
-                      style: TextStyle(
-                        color:Colors.white,
-                        fontSize: 18
-                      )
-                    ),
-                  ),
-                  const SizedBox(width: 10,),
-                  MaterialButton(
-                    minWidth: 130.0, 
-                    padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 30.0),
-                    color: Colors.blue,
-                    onPressed:() async {
-                      await Navigator.of(context).pushNamed('/clock');
-                    },
-                    child: const Text("碼錶",
                       style: TextStyle(
                         color:Colors.white,
                         fontSize: 18

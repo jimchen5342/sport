@@ -1,9 +1,5 @@
 package com.flutter.sport;
 
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.res.AssetFileDescriptor;
 import android.content.res.AssetManager;
 import android.media.MediaPlayer;
@@ -47,14 +43,10 @@ public class MainActivity extends FlutterActivity {
                 StandardMessageCodec.INSTANCE);
         messageChannel.setMessageHandler(mMessageHandler);
 
-        IntentFilter filter = new IntentFilter(TimeService.ACTION); // 注册BroadcastReceiver
-        registerReceiver(receiver, filter);
     }
     @Override
     public void onDestroy() {
         handler.removeCallbacks(runnable);
-        unregisterReceiver(receiver); // 取消注册BroadcastReceiver
-        stopTimer();
         super.onDestroy();
     }
 
@@ -74,10 +66,6 @@ public class MainActivity extends FlutterActivity {
         public void onMethodCall(@NonNull MethodCall call, @NonNull MethodChannel.Result result) {
             if(call.method.equals("beep")) {
                 beep();
-            } else if(call.method.equals("startTimer")) {
-                startTimer();
-            } else if(call.method.equals("stopTimer")) {
-                stopTimer();
             }
         }
     };
@@ -88,15 +76,7 @@ public class MainActivity extends FlutterActivity {
             reply.reply("messageChannel: 返回给flutter的数据");
         }
     };
-    void startTimer() {
-        Intent serviceIntent = new Intent(this, TimeService.class);
-        startService(serviceIntent);
-    }
 
-    void stopTimer() {
-        Intent serviceIntent = new Intent(this, TimeService.class);
-        stopService(serviceIntent);
-    }
 
     void beep(){
         if(mPlayer == null) {
@@ -135,15 +115,4 @@ public class MainActivity extends FlutterActivity {
             mPlayer.start();
         }
     }
-    private BroadcastReceiver receiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            if (intent.getAction().equals(TimeService.ACTION)) {
-                String time = intent.getStringExtra("time");
-//                Toast.makeText(context, time, Toast.LENGTH_SHORT).show();
-                messageChannel.send(time);
-//                beep();
-            }
-        }
-    };
 }
