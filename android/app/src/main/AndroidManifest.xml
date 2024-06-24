@@ -16,11 +16,6 @@
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher"
         android:label="sport">
-        <service
-            android:name=".TimeService"
-            android:enabled="true"
-            android:exported="true"></service>
-<!--        <service android:name=".TimeService" android:exported="false" />-->
         <activity
             android:name=".MainActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"

@@ -18,11 +18,8 @@ import io.flutter.plugins.GeneratedPluginRegistrant;
 
 public class MainActivity extends FlutterActivity {
     private MediaPlayer mPlayer = null;
-    BasicMessageChannel messageChannel;
+//    BasicMessageChannel messageChannel;
 
-
-    private Handler handler;
-    private Runnable runnable;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -39,14 +36,13 @@ public class MainActivity extends FlutterActivity {
                 "com.flutter/MethodChannel")
                 .setMethodCallHandler(mMethodHandle);
 
-        messageChannel = new BasicMessageChannel(flutterEngine.getDartExecutor(), "com.flutter/BasicMessageChannel",
-                StandardMessageCodec.INSTANCE);
-        messageChannel.setMessageHandler(mMessageHandler);
+//        messageChannel = new BasicMessageChannel(flutterEngine.getDartExecutor(), "com.flutter/BasicMessageChannel",
+//                StandardMessageCodec.INSTANCE);
+//        messageChannel.setMessageHandler(mMessageHandler);
 
     }
     @Override
     public void onDestroy() {
-        handler.removeCallbacks(runnable);
         super.onDestroy();
     }
 
@@ -70,12 +66,12 @@ public class MainActivity extends FlutterActivity {
         }
     };
 
-    BasicMessageChannel.MessageHandler<Object> mMessageHandler = new BasicMessageChannel.MessageHandler<Object>() {
-        @Override
-        public void onMessage(Object o, BasicMessageChannel.Reply<Object> reply) {
-            reply.reply("messageChannel: 返回给flutter的数据");
-        }
-    };
+//    BasicMessageChannel.MessageHandler<Object> mMessageHandler = new BasicMessageChannel.MessageHandler<Object>() {
+//        @Override
+//        public void onMessage(Object o, BasicMessageChannel.Reply<Object> reply) {
+//            reply.reply("messageChannel: 返回给flutter的数据");
+//        }
+//    };
 
 
     void beep(){
@@ -88,8 +84,8 @@ public class MainActivity extends FlutterActivity {
                 mPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
                     @Override
                     public void onCompletion(MediaPlayer mp) {
-//                        mPlayer.release();
-//                        mPlayer = null;
+                        mPlayer.release();
+                        mPlayer = null;
                     }
                 });
 
