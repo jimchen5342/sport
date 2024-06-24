@@ -8,20 +8,12 @@ import android.widget.Toast;
 import java.util.Calendar;
 import java.util.Locale;
 
-import io.flutter.Log;
-import io.flutter.embedding.engine.FlutterEngine;
-import io.flutter.embedding.engine.dart.DartExecutor;
-import io.flutter.plugin.common.BasicMessageChannel;
-import io.flutter.plugin.common.StringCodec;
-import io.flutter.view.FlutterMain;
-
 public class TimeService extends Service implements TextToSpeech.OnInitListener {
     private TextToSpeech tts;
     private Handler handler;
     private Runnable runnable;
 
-    private FlutterEngine flutterEngine;
-    private BasicMessageChannel<String> messageChannel;
+    static String ACTION = "";
 
     @Override
     public void onCreate() {
@@ -32,28 +24,10 @@ public class TimeService extends Service implements TextToSpeech.OnInitListener 
             @Override
             public void run() {
                 announceTime();
-                handler.postDelayed(this, 10 * 1000);
+                handler.postDelayed(this, 30 * 1000);
             }
         };
         handler.post(runnable);
-
-        flutterEngine = new FlutterEngine(this);
-
-        messageChannel = new BasicMessageChannel<>(
-                flutterEngine.getDartExecutor(), // .getBinaryMessenger(),
-                "com.flutter/BasicMessageChannel",
-                StringCodec.INSTANCE
-        );
-
-        messageChannel.setMessageHandler((message, reply) -> {
-            Log.i("TimeService", "Received message from Dart: " + message);
-            reply.reply("Message received on Android side");
-        });
-
-        flutterEngine.getDartExecutor().executeDartEntrypoint(
-                DartExecutor.DartEntrypoint.createDefault()
-        );
-
         Toast.makeText(this, "startService", Toast.LENGTH_SHORT).show();
     }
 
@@ -81,6 +55,7 @@ public class TimeService extends Service implements TextToSpeech.OnInitListener 
     public void onInit(int status) {
         if (status == TextToSpeech.SUCCESS) {
             int result = tts.setLanguage(Locale.US);
+//            int result = tts.setLanguage(Locale.TAIWAN);
             if (result == TextToSpeech.LANG_MISSING_DATA || result == TextToSpeech.LANG_NOT_SUPPORTED) {
                 Toast.makeText(this, "Language not supported", Toast.LENGTH_SHORT).show();
             }
@@ -94,11 +69,15 @@ public class TimeService extends Service implements TextToSpeech.OnInitListener 
         int hour = calendar.get(Calendar.HOUR_OF_DAY);
         int minute = calendar.get(Calendar.MINUTE);
         int second = calendar.get(Calendar.SECOND);
-        String timeText = String.format(Locale.US, "The time is %02d:%02d:%02d", hour, minute, second);
+        String timeText = String.format(Locale.US, "%02d:%02d:%02d", hour, minute, second);
 
-        Toast.makeText(this, timeText, Toast.LENGTH_SHORT).show();
-        tts.speak(timeText, TextToSpeech.QUEUE_FLUSH, null, null);
+        Toast.makeText(this, "Service: " + timeText, Toast.LENGTH_SHORT).show();
 
-        messageChannel.send(timeText);
+        Intent intent = new Intent();
+        intent.setAction(ACTION);
+        intent.putExtra("time",timeText);
+        sendBroadcast(intent);
+
+//        tts.speak(timeText, TextToSpeech.QUEUE_FLUSH, null, null);
     }
 }

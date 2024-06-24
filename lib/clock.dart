@@ -32,8 +32,6 @@ class _ClockState extends State<Clock> {
        try {
         await tts.initial();
         // count();
-
-
         methodChannel.invokeMethod('startTimer');
       } catch (e) {
         

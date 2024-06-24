@@ -1,13 +1,15 @@
 package com.flutter.sport;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.res.AssetFileDescriptor;
 import android.content.res.AssetManager;
 import android.media.MediaPlayer;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.WindowManager;
-import android.widget.Toast;
-
 import androidx.annotation.NonNull;
 
 import io.flutter.embedding.android.FlutterActivity;
@@ -17,11 +19,14 @@ import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.common.StandardMessageCodec;
 import io.flutter.plugins.GeneratedPluginRegistrant;
-// import com.ixsans.text_to_speech.Tts;
 
 public class MainActivity extends FlutterActivity {
     private MediaPlayer mPlayer = null;
     BasicMessageChannel messageChannel;
+
+
+    private Handler handler;
+    private Runnable runnable;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -38,11 +43,30 @@ public class MainActivity extends FlutterActivity {
                 "com.flutter/MethodChannel")
                 .setMethodCallHandler(mMethodHandle);
 
-//        messageChannel = new BasicMessageChannel(flutterEngine.getDartExecutor(), "com.flutter/BasicMessageChannel",
-//                StandardMessageCodec.INSTANCE);
-//        messageChannel.setMessageHandler(mMessageHandler);
+        messageChannel = new BasicMessageChannel(flutterEngine.getDartExecutor(), "com.flutter/BasicMessageChannel",
+                StandardMessageCodec.INSTANCE);
+        messageChannel.setMessageHandler(mMessageHandler);
 
-//        messageChannel.send("");
+        IntentFilter filter = new IntentFilter(TimeService.ACTION); // 注册BroadcastReceiver
+        registerReceiver(receiver, filter);
+    }
+    @Override
+    public void onDestroy() {
+        handler.removeCallbacks(runnable);
+        unregisterReceiver(receiver); // 取消注册BroadcastReceiver
+        stopTimer();
+        super.onDestroy();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+
     }
 
     MethodChannel.MethodCallHandler mMethodHandle = new MethodChannel.MethodCallHandler() {
@@ -84,8 +108,8 @@ public class MainActivity extends FlutterActivity {
                 mPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
                     @Override
                     public void onCompletion(MediaPlayer mp) {
-                        mPlayer.release();
-                        mPlayer = null;
+//                        mPlayer.release();
+//                        mPlayer = null;
                     }
                 });
 
@@ -107,6 +131,19 @@ public class MainActivity extends FlutterActivity {
                 e.printStackTrace();
                 mPlayer = null;
             }
+        } else {
+            mPlayer.start();
         }
     }
+    private BroadcastReceiver receiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent.getAction().equals(TimeService.ACTION)) {
+                String time = intent.getStringExtra("time");
+//                Toast.makeText(context, time, Toast.LENGTH_SHORT).show();
+                messageChannel.send(time);
+//                beep();
+            }
+        }
+    };
 }
